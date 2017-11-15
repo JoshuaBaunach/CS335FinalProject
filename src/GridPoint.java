@@ -24,6 +24,8 @@ public class GridPoint extends JPanel
 
         addMouseListener(new RubberbandListener());
         addMouseMotionListener(new RubberbandMotionListener());
+
+        setOpaque(false);
     }
 
     // Getters/setters

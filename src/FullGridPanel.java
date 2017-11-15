@@ -56,7 +56,6 @@ public class FullGridPanel extends JPanel
     {
         super.paintComponent(g);
 
-        // TODO: Get the black rectangle to paint
         // If no image is present, just draw a black background
         if (img == null)
         {
