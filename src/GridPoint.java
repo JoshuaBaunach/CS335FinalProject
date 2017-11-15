@@ -11,7 +11,8 @@ public class GridPoint extends JPanel
     // Private variables
     private final int POINTRADIUS = 3;
     private int pointSize, controlX, controlY;
-    private boolean moved, rubberbanding;
+    private boolean moved, rubberbanding, partnerMoved;
+    private GridPoint partnerPoint;
 
     public GridPoint(int pointSize)
     {
@@ -24,6 +25,10 @@ public class GridPoint extends JPanel
         addMouseListener(new RubberbandListener());
         addMouseMotionListener(new RubberbandMotionListener());
     }
+
+    // Getters/setters
+    public void setPartnerPoint(GridPoint partner) { partnerPoint = partner; }
+    public void setPartnerMoved(boolean moved) { partnerMoved = true; }
 
     // Function to repaint this component
     protected void paintComponent(Graphics g)
@@ -42,7 +47,7 @@ public class GridPoint extends JPanel
 
         // Draw the control point
         g.drawOval(controlX-POINTRADIUS, controlY-POINTRADIUS, POINTRADIUS*2, POINTRADIUS*2);
-        if (moved) g.setColor(Color.GREEN);
+        if (moved || partnerMoved) g.setColor(Color.GREEN);
         else g.setColor(Color.RED);
         g.fillOval(controlX-POINTRADIUS, controlY-POINTRADIUS, POINTRADIUS*2, POINTRADIUS*2);
     }
@@ -77,6 +82,7 @@ public class GridPoint extends JPanel
                     controlY = e.getY();
 
                 repaint();
+                partnerPoint.repaint();
             }
         }
     }
@@ -91,6 +97,7 @@ public class GridPoint extends JPanel
             {
                 rubberbanding = true;
                 moved = true;
+                partnerPoint.setPartnerMoved(true);
             }
         }
 

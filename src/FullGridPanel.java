@@ -14,6 +14,7 @@ public class FullGridPanel extends JPanel
     private GridLayout layout;
     private GridPoint[][] points;
     private BufferedImage img;
+    private FullGridPanel partnerPanel;
 
     public FullGridPanel(int gridSize, int pointSize)
     {
@@ -25,12 +26,28 @@ public class FullGridPanel extends JPanel
 
         points = new GridPoint[gridSize][gridSize];
 
-        for (GridPoint[] subArray: points)
+        for (int i = 0; i < gridSize; i++)
         {
-            for (GridPoint point: subArray)
+            for (int j = 0; j < gridSize; j++)
             {
-                point = new GridPoint(pointSize);
-                add(point);
+                points[i][j] = new GridPoint(pointSize);
+                add(points[i][j]);
+            }
+        }
+    }
+
+    // Getters/setters
+    public GridPoint getPoint(int gridx, int gridy) { return points[gridx][gridy]; }
+
+    public void setPartnerPanel(FullGridPanel partner)
+    {
+        partnerPanel = partner;
+        for (int i = 0; i < gridSize; i++)
+        {
+            for (int j = 0; j < gridSize; j++)
+            {
+                this.getPoint(i, j).setPartnerPoint(partner.getPoint(i, j));
+                partner.getPoint(i, j).setPartnerPoint(this.getPoint(i, j));
             }
         }
     }

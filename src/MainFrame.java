@@ -16,10 +16,18 @@ public class MainFrame extends JFrame
 
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        // Add one full grid panel
-        FullGridPanel panel = new FullGridPanel(10, 50);
-        add(panel);
+        // Temp Layout
+        setLayout(new GridLayout(1, 2));
 
+        // Add one full grid panel
+        FullGridPanel sourcePanel = new FullGridPanel(10, 50);
+        FullGridPanel destPanel = new FullGridPanel(10, 50);
+
+        sourcePanel.setPartnerPanel(destPanel);
+        destPanel.setPartnerPanel(sourcePanel);
+
+        add(sourcePanel);
+        add(destPanel);
 
         pack();
         setVisible(true);
