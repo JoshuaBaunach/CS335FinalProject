@@ -11,12 +11,13 @@ public class FullGridPanel extends JPanel
 {
     // Private variables
     private int gridSize, pointSize;
+    private boolean editMode;
     private GridLayout layout;
     private GridPoint[][] points;
     private BufferedImage img;
     private FullGridPanel partnerPanel;
 
-    public FullGridPanel(int gridSize, int pointSize)
+    public FullGridPanel(int gridSize, int pointSize, boolean editMode)
     {
         this.gridSize = gridSize;
         this.pointSize = pointSize;
@@ -56,12 +57,21 @@ public class FullGridPanel extends JPanel
     {
         super.paintComponent(g);
 
+        Graphics2D g2d = (Graphics2D) g;
+
         // If no image is present, just draw a black background
         if (img == null)
         {
             g.setColor(Color.BLACK);
             g.fillRect(0, 0, pointSize * gridSize, pointSize * gridSize);
         }
+
+        // Draw a border around the entire object
+        g2d.setColor(Color.WHITE);
+        Stroke oldStroke = g2d.getStroke();
+        g2d.setStroke(new BasicStroke(5));
+        g2d.drawRect(0, 0, pointSize * gridSize, pointSize * gridSize);
+        g2d.setStroke(oldStroke);
     }
 
     public Dimension getPreferredSize()
