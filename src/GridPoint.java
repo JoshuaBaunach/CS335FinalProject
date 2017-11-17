@@ -9,7 +9,7 @@ import java.awt.*;
 public class GridPoint extends JPanel
 {
     // Private variables
-    private final int POINTRADIUS = 3;
+    private final int POINTRADIUS = 5;
     private int pointSize, controlX, controlY;
     private boolean moved, rubberbanding, partnerMoved;
     private GridPoint partnerPoint;
@@ -28,12 +28,28 @@ public class GridPoint extends JPanel
         setOpaque(false);
     }
 
+    // Copy constructor
+    public GridPoint(GridPoint point)
+    {
+        this.pointSize = point.pointSize;
+        this.controlX = point.controlX;
+        this.controlY = point.controlY;
+        this.moved = point.moved;
+        this.rubberbanding = false;
+
+        addMouseListener(new RubberbandListener());
+        addMouseMotionListener(new RubberbandMotionListener());
+
+        setOpaque(false);
+    }
+
     // Getters/setters
     public void setPartnerPoint(GridPoint partner) { partnerPoint = partner; }
     public void setPartnerMoved(boolean moved) { partnerMoved = true; }
     public void setControlPoint(Point p) { controlX = p.x; controlY = p.y; }
 
     public Point getControlPoint() { return new Point(controlX, controlY); }
+    public boolean getMoved() { return moved; }
 
     // Function to repaint this component
     protected void paintComponent(Graphics g)

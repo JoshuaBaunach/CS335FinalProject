@@ -82,7 +82,7 @@ public class MainFrame extends JFrame
         saveItem = new JMenuItem("Save");
         exitItem = new JMenuItem("Exit");
         exitItem.addActionListener(new ActionListener() {
-            @Override
+            //@Override
             public void actionPerformed(ActionEvent e) {
                 System.exit(0);
             }
@@ -99,7 +99,7 @@ public class MainFrame extends JFrame
 
         previewItem = new JMenuItem("Preview Animation");
         previewItem.addActionListener(new ActionListener() {
-            @Override
+            //@Override
             public void actionPerformed(ActionEvent e) {
                 previewFrame.setVisible(true);
             }
