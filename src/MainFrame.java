@@ -7,6 +7,7 @@ his/her usage of the application.
 import javax.swing.*;
 import java.awt.event.*;
 import java.awt.*;
+import java.util.Vector;
 
 public class MainFrame extends JFrame
 {
@@ -20,6 +21,7 @@ public class MainFrame extends JFrame
     private JMenuBar menuBar;
     private JMenu fileMenu, animationMenu;
     private JMenuItem newItem, openItem, saveItem, exitItem, previewItem;
+    private int gridSize, pointSize;
 
     public MainFrame()
     {
@@ -50,9 +52,12 @@ public class MainFrame extends JFrame
      */
     public void initFrame()
     {
+        gridSize = 10;
+        pointSize = 50;
+
         // Add two full grid panels
-        sourcePanel = new FullGridPanel(10, 50, true);
-        destPanel = new FullGridPanel(10, 50, true);
+        sourcePanel = new FullGridPanel(gridSize, pointSize, true);
+        destPanel = new FullGridPanel(gridSize, pointSize, true);
 
         sourcePanel.setPartnerPanel(destPanel);
         destPanel.setPartnerPanel(sourcePanel);
@@ -101,6 +106,18 @@ public class MainFrame extends JFrame
         previewItem.addActionListener(new ActionListener() {
             //@Override
             public void actionPerformed(ActionEvent e) {
+                // Fetch all of the "tween" data points
+                Vector<TweenDataPoint> tweens = new Vector();
+                for (int i = 0; i < gridSize; i++)
+                {
+                    for (int j = 0; j < gridSize; j++)
+                    {
+                        if (sourcePanel.getPoint(i, j).getMoved())
+                            tweens.add(new TweenDataPoint(sourcePanel.getPoint(i, j), destPanel.getPoint(i, j), i, j));
+                    }
+                }
+                previewFrame.setTweens(tweens);
+                previewFrame.init(60, 60, gridSize, pointSize);
                 previewFrame.setVisible(true);
             }
         });

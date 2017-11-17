@@ -44,8 +44,9 @@ public class GridPoint extends JPanel
     }
 
     // Getters/setters
+    public void setMoved(boolean moved) { this.moved = moved; }
     public void setPartnerPoint(GridPoint partner) { partnerPoint = partner; }
-    public void setPartnerMoved(boolean moved) { partnerMoved = true; }
+    public void setPartnerMoved(boolean moved) { partnerMoved = moved; }
     public void setControlPoint(Point p) { controlX = p.x; controlY = p.y; }
 
     public Point getControlPoint() { return new Point(controlX, controlY); }
