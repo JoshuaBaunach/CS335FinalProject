@@ -5,6 +5,8 @@ his/her usage of the application.
  */
 
 import javax.swing.*;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import java.awt.event.*;
 import java.awt.*;
 import java.util.Vector;
@@ -20,8 +22,16 @@ public class MainFrame extends JFrame
     private GridBagConstraints constraints;
     private JMenuBar menuBar;
     private JMenu fileMenu, animationMenu;
-    private JMenuItem newItem, openItem, saveItem, exitItem, previewItem;
+    private JMenuItem newItem, openItem, saveItem, exitItem, previewItem, adjItem;
     private int gridSize, pointSize;
+
+    private JSlider swingSliderFps, swingSliderTime;
+    private JFrame adjFrame; // frame used for fps and time adjustments
+    private JPanel adjPanel;
+    private GridLayout gridLayout;
+    private JLabel fpsLabel, timeLabel;
+    private int fps, aniTime;
+    private int frameCount;
 
     public MainFrame()
     {
@@ -45,6 +55,7 @@ public class MainFrame extends JFrame
 
         // Create the preview frame and save it for later
         previewFrame = new PreviewFrame();
+
     }
 
     /*
@@ -69,6 +80,26 @@ public class MainFrame extends JFrame
         constraints.gridx = 1;
         constraints.gridy = 0;
         mainPanel.add(destPanel);
+
+        // Slider init:
+
+        // setting labels
+        fpsLabel = new JLabel("FPS: 60");
+        timeLabel = new JLabel("Time: 1 second(s)");
+
+        //fps slider init
+        swingSliderFps = new JSlider(JSlider.HORIZONTAL, 1, 60, 60);
+        swingSliderFps.setLayout(new BorderLayout());
+        swingSliderFps.setPaintLabels(true);
+        swingSliderFps.setPaintTicks(true);
+        swingSliderFps.setPreferredSize(new Dimension(200,30));
+
+        // time slider init
+        swingSliderTime = new JSlider(JSlider.HORIZONTAL, 1, 5, 1);
+        swingSliderTime.setLayout(new BorderLayout());
+        swingSliderTime.setPaintLabels(true);
+        swingSliderTime.setPaintTicks(true);
+        swingSliderTime.setPreferredSize(new Dimension(200,30));
     }
 
     /*
@@ -102,6 +133,49 @@ public class MainFrame extends JFrame
         animationMenu = new JMenu("Animation");
         menuBar.add(animationMenu);
 
+        // for the sliders frame to adjust fps:
+        adjItem = new JMenuItem("Adjust Animation");
+        adjItem.addActionListener(new ActionListener() {
+            //@Override
+            public void actionPerformed(ActionEvent e)
+            {
+                // make another frame pop-up for slider adjustment
+                adjFrame = new JFrame("Adjust Animation");
+                adjPanel = new JPanel();
+
+                //setting layout on the adjPanel
+                gridLayout = new GridLayout(0,2);
+                adjPanel.setLayout(gridLayout);
+
+                // adding labels overtop the sliders
+                adjPanel.add(fpsLabel);
+                adjPanel.add(timeLabel);
+
+                //adding the sliders to the frame/panel
+                adjPanel.add(swingSliderFps);
+                adjPanel.add(swingSliderTime);
+                adjFrame.getContentPane().add(adjPanel);
+
+                //adjFrame.setSize(745, 470);
+                adjFrame.pack();
+                adjFrame.setVisible(true);
+
+                swingSliderFps.addChangeListener(new ChangeListener() {
+                    public void stateChanged(ChangeEvent e) {
+                        fpsLabel.setText("FPS: " + swingSliderFps.getValue());
+                    }
+                });
+
+                swingSliderTime.addChangeListener(new ChangeListener() {
+                    public void stateChanged(ChangeEvent e) {
+                        timeLabel.setText("Time: " + swingSliderTime.getValue() + " second(s)");
+                    }
+                });
+
+            }
+        });
+
+
         previewItem = new JMenuItem("Preview Animation");
         previewItem.addActionListener(new ActionListener() {
             //@Override
@@ -117,11 +191,19 @@ public class MainFrame extends JFrame
                     }
                 }
                 previewFrame.setTweens(tweens);
-                previewFrame.init(60, 60, gridSize, pointSize);
+
+                // default: 60 fps and a framecount of 60 - represents 60 fps at a total animation time of 1 second
+                fps = swingSliderFps.getValue();
+                aniTime = swingSliderTime.getValue();
+                frameCount = fps * aniTime;
+
+                // init the previewFrame
+                previewFrame.init(fps, frameCount, gridSize, pointSize);
                 previewFrame.setVisible(true);
             }
         });
         animationMenu.add(previewItem);
+        animationMenu.add(adjItem);
 
         add(menuBar, BorderLayout.NORTH);
     }
