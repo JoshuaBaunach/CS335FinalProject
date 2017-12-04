@@ -23,7 +23,7 @@ public class MainFrame extends JFrame
     private JMenuBar menuBar;
     private JMenu fileMenu, animationMenu;
     private JMenuItem newItem, openItem, saveItem, exitItem, previewItem, adjItem;
-    private int gridSize, pointSize;
+    private int gridWidth, gridHeight, pointSize;
 
     private JSlider swingSliderFps, swingSliderTime;
     private JFrame adjFrame; // frame used for fps and time adjustments
@@ -32,6 +32,10 @@ public class MainFrame extends JFrame
     private JLabel fpsLabel, timeLabel;
     private int fps, aniTime;
     private int frameCount;
+
+    // Constant Variables
+    private final String DEFAULTSRC = "res/MillenniumForce.jpg";
+    private final String DEFAULTDEST = "res/Maverick.jpg";
 
     public MainFrame()
     {
@@ -63,12 +67,12 @@ public class MainFrame extends JFrame
      */
     public void initFrame()
     {
-        gridSize = 10;
-        pointSize = 50;
+        gridWidth = 10;
+        gridHeight = 10;
 
         // Add two full grid panels
-        sourcePanel = new FullGridPanel(gridSize, pointSize, true);
-        destPanel = new FullGridPanel(gridSize, pointSize, true);
+        sourcePanel = new FullGridPanel(gridWidth, gridHeight, true, DEFAULTSRC);
+        destPanel = new FullGridPanel(gridWidth, gridHeight, true, DEFAULTDEST, sourcePanel.getPanelWidth(), sourcePanel.getPanelHeight());
 
         sourcePanel.setPartnerPanel(destPanel);
         destPanel.setPartnerPanel(sourcePanel);
@@ -182,12 +186,12 @@ public class MainFrame extends JFrame
             public void actionPerformed(ActionEvent e) {
                 // Fetch all of the "tween" data points
                 Vector<TweenDataPoint> tweens = new Vector();
-                for (int i = 0; i < gridSize; i++)
+                for (int i = 0; i < gridWidth; i++)
                 {
-                    for (int j = 0; j < gridSize; j++)
+                    for (int j = 0; j < gridHeight; j++)
                     {
-                        if (sourcePanel.getPoint(i, j).getMoved())
-                            tweens.add(new TweenDataPoint(sourcePanel.getPoint(i, j), destPanel.getPoint(i, j), i, j));
+                        //if (sourcePanel.getPoint(i, j).getMoved() || destPanel.getPoint(i, j).getMoved())
+                        tweens.add(new TweenDataPoint(sourcePanel.getPoint(i, j), destPanel.getPoint(i, j), i, j));
                     }
                 }
                 previewFrame.setTweens(tweens);
@@ -198,7 +202,8 @@ public class MainFrame extends JFrame
                 frameCount = fps * aniTime;
 
                 // init the previewFrame
-                previewFrame.init(fps, frameCount, gridSize, pointSize);
+                previewFrame.init(fps, frameCount, gridWidth, gridHeight, sourcePanel.getMorphableImage().getBufferedImage(),
+                        destPanel.getMorphableImage().getBufferedImage());
                 previewFrame.setVisible(true);
             }
         });

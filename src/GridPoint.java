@@ -9,16 +9,17 @@ import java.awt.*;
 public class GridPoint extends JPanel
 {
     // Private variables
-    private final int POINTRADIUS = 5;
-    private int pointSize, controlX, controlY;
+    private final int POINTRADIUS = 3;
+    private int pointWidth, pointHeight, controlX, controlY;
     private boolean moved, rubberbanding, partnerMoved;
     private GridPoint partnerPoint;
 
-    public GridPoint(int pointSize)
+    public GridPoint(int pointWidth, int pointHeight)
     {
-        this.pointSize = pointSize;
-        this.controlX = pointSize / 2;
-        this.controlY = controlX;
+        this.pointWidth = pointWidth;
+        this.pointHeight = pointHeight;
+        this.controlX = pointWidth / 2;
+        this.controlY = pointHeight / 2;
         this.moved = false;
         this.rubberbanding = false;
 
@@ -31,7 +32,8 @@ public class GridPoint extends JPanel
     // Copy constructor
     public GridPoint(GridPoint point)
     {
-        this.pointSize = point.pointSize;
+        this.pointWidth = point.pointWidth;
+        this.pointHeight = point.pointHeight;
         this.controlX = point.controlX;
         this.controlY = point.controlY;
         this.moved = point.moved;
@@ -59,13 +61,13 @@ public class GridPoint extends JPanel
 
         // Draw a rectangle around the boundaries
         g.setColor(Color.WHITE);
-        g.drawRect(0, 0, pointSize, pointSize);
+        g.drawRect(0, 0, pointWidth, pointHeight);
 
         // Draw lines from each opposing to the point
         g.drawLine(0, 0, controlX - POINTRADIUS, controlY - POINTRADIUS);
-        g.drawLine(0, pointSize, controlX - POINTRADIUS, controlY + POINTRADIUS);
-        g.drawLine(pointSize, 0, controlX + POINTRADIUS, controlY - POINTRADIUS);
-        g.drawLine(pointSize, pointSize, controlX + POINTRADIUS, controlY + POINTRADIUS);
+        g.drawLine(0, pointHeight, controlX - POINTRADIUS, controlY + POINTRADIUS);
+        g.drawLine(pointWidth, 0, controlX + POINTRADIUS, controlY - POINTRADIUS);
+        g.drawLine(pointWidth, pointHeight, controlX + POINTRADIUS, controlY + POINTRADIUS);
 
         // Draw the control point
         g.drawOval(controlX-POINTRADIUS, controlY-POINTRADIUS, POINTRADIUS*2, POINTRADIUS*2);
@@ -77,7 +79,7 @@ public class GridPoint extends JPanel
     // Get preferred size
     public Dimension getPreferredSize()
     {
-        return new Dimension(pointSize, pointSize);
+        return new Dimension(pointWidth, pointHeight);
     }
 
     // This private class handles the motion for the rubberbanding.
@@ -88,16 +90,16 @@ public class GridPoint extends JPanel
             if (rubberbanding)
             {
                 // If mouse x is out of bounds, set the x pos to the bound
-                if (e.getX() > pointSize)
-                    controlX = pointSize;
+                if (e.getX() > pointWidth)
+                    controlX = pointWidth;
                 else if (e.getX() < 0)
                     controlX = 0;
                 else
                     controlX = e.getX();
 
                 // If mouse y is out of bounds, set the y pos to the bound
-                if (e.getY() > pointSize)
-                    controlY = pointSize;
+                if (e.getY() > pointHeight)
+                    controlY = pointHeight;
                 else if (e.getY() < 0)
                     controlY = 0;
                 else
