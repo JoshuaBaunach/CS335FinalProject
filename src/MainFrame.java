@@ -9,6 +9,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import java.awt.event.*;
 import java.awt.*;
+import java.io.File;
 import java.util.Vector;
 
 public class MainFrame extends JFrame
@@ -22,7 +23,8 @@ public class MainFrame extends JFrame
     private GridBagConstraints constraints;
     private JMenuBar menuBar;
     private JMenu fileMenu, animationMenu;
-    private JMenuItem newItem, openItem, saveItem, exitItem, previewItem, adjItem, resolutionItem;
+    private JMenuItem newItem, openSrcItem, openDestItem, saveItem, exitItem, previewItem, adjItem, resolutionItem;
+    private JFileChooser fileChooser;
     private int gridWidth, gridHeight, pointSize;
 
     private JSlider swingSliderFps, swingSliderTime, controlPointXResolutionSlider, controlPointYResolutionSlider;
@@ -32,6 +34,7 @@ public class MainFrame extends JFrame
     private JLabel fpsLabel, timeLabel, xResLabel, yResLabel;
     private int fps, aniTime;
     private int frameCount;
+    private String srcDirectory, destDirectory;
 
     // Constant Variables
     private final String DEFAULTSRC = "res/Seales.jpg";
@@ -50,8 +53,12 @@ public class MainFrame extends JFrame
         mainPanel.setLayout(layout);
         setLayout(new BorderLayout());
 
+        fileChooser = new JFileChooser();
+
         gridWidth = 10;
         gridHeight = 10;
+        srcDirectory = DEFAULTSRC;
+        destDirectory = DEFAULTDEST;
 
         initMenu();
         initFrame();
@@ -88,8 +95,8 @@ public class MainFrame extends JFrame
     public void initFrame()
     {
         // Add two full grid panels
-        sourcePanel = new FullGridPanel(gridWidth, gridHeight, true, DEFAULTSRC);
-        destPanel = new FullGridPanel(gridWidth, gridHeight, true, DEFAULTDEST, sourcePanel.getPanelWidth(), sourcePanel.getPanelHeight());
+        sourcePanel = new FullGridPanel(gridWidth, gridHeight, true, srcDirectory);
+        destPanel = new FullGridPanel(gridWidth, gridHeight, true, destDirectory, sourcePanel.getPanelWidth(), sourcePanel.getPanelHeight());
 
         sourcePanel.setPartnerPanel(destPanel);
         destPanel.setPartnerPanel(sourcePanel);
@@ -157,7 +164,34 @@ public class MainFrame extends JFrame
         menuBar.add(fileMenu);
 
         newItem = new JMenuItem("New");
-        openItem = new JMenuItem("Open");
+        openSrcItem = new JMenuItem("Import Source Image");
+        openSrcItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                int dialogVal = fileChooser.showOpenDialog(getContentPane());
+
+                if (dialogVal == JFileChooser.APPROVE_OPTION)
+                {
+                    File f = fileChooser.getSelectedFile();
+                    srcDirectory = f.getAbsolutePath();
+                    resetFrame();
+                }
+            }
+        });
+        openDestItem = new JMenuItem("Import Destination Image");
+        openDestItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                int dialogVal = fileChooser.showOpenDialog(getContentPane());
+
+                if (dialogVal == JFileChooser.APPROVE_OPTION)
+                {
+                    File f = fileChooser.getSelectedFile();
+                    destDirectory = f.getAbsolutePath();
+                    resetFrame();
+                }
+            }
+        });
         saveItem = new JMenuItem("Save");
         exitItem = new JMenuItem("Exit");
         exitItem.addActionListener(new ActionListener() {
@@ -167,7 +201,8 @@ public class MainFrame extends JFrame
             }
         });
         fileMenu.add(newItem);
-        fileMenu.add(openItem);
+        fileMenu.add(openSrcItem);
+        fileMenu.add(openDestItem);
         fileMenu.add(saveItem);
         fileMenu.addSeparator();
         fileMenu.add(exitItem);
