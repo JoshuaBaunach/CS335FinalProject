@@ -9,7 +9,7 @@ import java.awt.*;
 public class GridPoint extends JPanel
 {
     // Private variables
-    private final int POINTRADIUS = 3;
+    private final int POINTRADIUS = 2;
     private int pointWidth, pointHeight, controlX, controlY;
     private boolean moved, rubberbanding, partnerMoved;
     private GridPoint partnerPoint;

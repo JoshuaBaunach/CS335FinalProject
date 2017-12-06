@@ -22,8 +22,11 @@ public class MainFrame extends JFrame
     private GridBagLayout layout;
     private GridBagConstraints constraints;
     private JMenuBar menuBar;
-    private JMenu fileMenu, animationMenu;
-    private JMenuItem newItem, openSrcItem, openDestItem, saveItem, exitItem, previewItem, adjItem, resolutionItem;
+    private JMenu fileMenu, animationMenu; // Menus that will appear at the top of the menu bar
+    private JMenu exportSubmenu; // Submenus
+    private JMenuItem newItem, openSrcItem, openDestItem, saveItem, exitItem, previewItem, adjItem, resolutionItem,
+    exportJPEGItem;
+
     private JFileChooser fileChooser;
     private int gridWidth, gridHeight, pointSize;
 
@@ -37,8 +40,8 @@ public class MainFrame extends JFrame
     private String srcDirectory, destDirectory;
 
     // Constant Variables
-    private final String DEFAULTSRC = "res/Seales.jpg";
-    private final String DEFAULTDEST = "res/Jesus.jpg";
+    private final String DEFAULTSRC = "res/Nathaniel.jpg";
+    private final String DEFAULTDEST = "res/Seales.jpg";
 
     public MainFrame()
     {
@@ -168,13 +171,18 @@ public class MainFrame extends JFrame
         openSrcItem.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                fileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
+                fileChooser.setMultiSelectionEnabled(false);
+                fileChooser.setDialogTitle("Import Source Image");
                 int dialogVal = fileChooser.showOpenDialog(getContentPane());
 
                 if (dialogVal == JFileChooser.APPROVE_OPTION)
                 {
                     File f = fileChooser.getSelectedFile();
-                    srcDirectory = f.getAbsolutePath();
-                    resetFrame();
+                    if (!f.isDirectory()) {
+                        srcDirectory = f.getAbsolutePath();
+                        resetFrame();
+                    }
                 }
             }
         });
@@ -182,13 +190,18 @@ public class MainFrame extends JFrame
         openDestItem.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                fileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
+                fileChooser.setMultiSelectionEnabled(false);
+                fileChooser.setDialogTitle("Import Destination Image");
                 int dialogVal = fileChooser.showOpenDialog(getContentPane());
 
                 if (dialogVal == JFileChooser.APPROVE_OPTION)
                 {
                     File f = fileChooser.getSelectedFile();
-                    destDirectory = f.getAbsolutePath();
-                    resetFrame();
+                    if (!f.isDirectory()) {
+                        destDirectory = f.getAbsolutePath();
+                        resetFrame();
+                    }
                 }
             }
         });
@@ -200,10 +213,56 @@ public class MainFrame extends JFrame
                 System.exit(0);
             }
         });
+
+        // Create the menus needed for exporting the image
+        exportSubmenu = new JMenu("Export...");
+        exportJPEGItem = new JMenuItem("JPEG Images");
+        exportJPEGItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+                fileChooser.setMultiSelectionEnabled(false);
+                fileChooser.setDialogTitle("Choose Export Directory");
+                fileChooser.setApproveButtonText("Export");
+                int dialogVal = fileChooser.showOpenDialog(getContentPane());
+
+                if (dialogVal == JFileChooser.APPROVE_OPTION)
+                {
+                    File f = fileChooser.getSelectedFile();
+                    ExportMorphFrame emf = new ExportMorphFrame(f.getAbsolutePath());
+                    Vector<TweenDataPoint> tweens = new Vector();
+                    for (int i = 0; i < gridWidth; i++)
+                    {
+                        for (int j = 0; j < gridHeight; j++)
+                        {
+                            //if (sourcePanel.getPoint(i, j).getMoved() || destPanel.getPoint(i, j).getMoved())
+                            tweens.add(new TweenDataPoint(sourcePanel.getPoint(i, j), destPanel.getPoint(i, j), i, j));
+                        }
+                    }
+                    emf.setTweens(tweens);
+                    // default: 60 fps and a framecount of 60 - represents 60 fps at a total animation time of 1 second
+                    fps = swingSliderFps.getValue();
+                    aniTime = swingSliderTime.getValue();
+                    frameCount = fps * aniTime;
+                    emf.init(fps, frameCount, gridWidth, gridHeight, sourcePanel.getMorphableImage().getBufferedImage(),
+                            destPanel.getMorphableImage().getBufferedImage(), sourcePanel.getPoints(), destPanel.getPoints());
+                    emf.renderFrames();
+                    emf.dispatchEvent(new WindowEvent(emf, WindowEvent.WINDOW_CLOSING));
+                }
+            }
+        });
         fileMenu.add(newItem);
         fileMenu.add(openSrcItem);
         fileMenu.add(openDestItem);
+
+        fileMenu.addSeparator();
+
         fileMenu.add(saveItem);
+
+        fileMenu.addSeparator();
+
+        fileMenu.add(exportSubmenu);
+        exportSubmenu.add(exportJPEGItem);
         fileMenu.addSeparator();
         fileMenu.add(exitItem);
 

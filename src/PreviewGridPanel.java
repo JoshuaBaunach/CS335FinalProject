@@ -25,6 +25,7 @@ public class PreviewGridPanel extends FullGridPanel{
     }
 
     // Getters/setters
+    public MorphableImagePair getImgPair() { return imgPair; }
     public void setStage(float stage) { this.stage = stage; }
 
     /*
