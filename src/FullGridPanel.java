@@ -14,7 +14,8 @@ public class FullGridPanel extends JPanel
     protected boolean editMode;
     protected int width, height;
     protected float stage;
-    protected GridLayout layout;
+    protected GridBagLayout layout;
+    protected GridBagConstraints c;
     protected GridPoint[][] points;
     protected FullGridPanel partnerPanel;
     protected MorphableImage image;
@@ -45,7 +46,12 @@ public class FullGridPanel extends JPanel
         pointWidth = width / gridWidth;
         pointHeight = height / gridHeight;
 
-        layout = new GridLayout(gridWidth, gridHeight);
+        layout = new GridBagLayout();
+        c = new GridBagConstraints();
+        c.anchor = GridBagConstraints.FIRST_LINE_START;
+        c.weightx = 1;
+        c.weighty = 1;
+        c.fill = GridBagConstraints.BOTH;
         setLayout(layout);
 
         points = new GridPoint[gridWidth][gridHeight];
@@ -55,7 +61,9 @@ public class FullGridPanel extends JPanel
             for (int j = 0; j < gridHeight; j++)
             {
                 points[i][j] = new GridPoint(pointWidth, pointHeight);
-                add(points[i][j]);
+                c.gridx = i;
+                c.gridy = j;
+                add(points[i][j], c);
             }
         }
 
@@ -72,7 +80,12 @@ public class FullGridPanel extends JPanel
 
         pointWidth = width / gridWidth;
         pointHeight = height / gridHeight;
-        layout = new GridLayout(gridWidth, gridHeight);
+        layout = new GridBagLayout();
+        c = new GridBagConstraints();
+        c.anchor = GridBagConstraints.FIRST_LINE_START;
+        c.weightx = 1;
+        c.weighty = 1;
+        c.fill = GridBagConstraints.BOTH;
         setLayout(layout);
 
         points = new GridPoint[gridWidth][gridHeight];
@@ -80,7 +93,9 @@ public class FullGridPanel extends JPanel
         for (int i = 0; i < gridWidth; i++) {
             for (int j = 0; j < gridHeight; j++) {
                 points[i][j] = new GridPoint(pointWidth, pointHeight);
-                add(points[i][j]);
+                c.gridx = i;
+                c.gridy = j;
+                add(points[i][j], c);
             }
         }
     }
@@ -110,7 +125,12 @@ public class FullGridPanel extends JPanel
         pointWidth = width / gridWidth;
         pointHeight = height / gridHeight;
 
-        layout = new GridLayout(gridWidth, gridHeight);
+        layout = new GridBagLayout();
+        c = new GridBagConstraints();
+        c.anchor = GridBagConstraints.FIRST_LINE_START;
+        c.weightx = 1;
+        c.weighty = 1;
+        c.fill = GridBagConstraints.BOTH;
         setLayout(layout);
 
         points = new GridPoint[gridWidth][gridHeight];
@@ -120,7 +140,9 @@ public class FullGridPanel extends JPanel
             for (int j = 0; j < gridHeight; j++)
             {
                 points[i][j] = new GridPoint(pointWidth, pointHeight);
-                add(points[i][j]);
+                c.gridx = i;
+                c.gridy = j;
+                add(points[i][j], c);
             }
         }
 

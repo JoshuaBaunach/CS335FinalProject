@@ -59,6 +59,9 @@ public class GridPoint extends JPanel
     {
         super.paintComponent(g);
 
+        Graphics2D g2d = (Graphics2D) g;
+        g2d.setComposite(AlphaComposite.SrcOver.derive(1f));
+
         // Draw a rectangle around the boundaries
         g.setColor(Color.WHITE);
         g.drawRect(0, 0, pointWidth, pointHeight);

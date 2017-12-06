@@ -22,20 +22,20 @@ public class MainFrame extends JFrame
     private GridBagConstraints constraints;
     private JMenuBar menuBar;
     private JMenu fileMenu, animationMenu;
-    private JMenuItem newItem, openItem, saveItem, exitItem, previewItem, adjItem;
+    private JMenuItem newItem, openItem, saveItem, exitItem, previewItem, adjItem, resolutionItem;
     private int gridWidth, gridHeight, pointSize;
 
-    private JSlider swingSliderFps, swingSliderTime;
+    private JSlider swingSliderFps, swingSliderTime, controlPointXResolutionSlider, controlPointYResolutionSlider;
     private JFrame adjFrame; // frame used for fps and time adjustments
     private JPanel adjPanel;
     private GridLayout gridLayout;
-    private JLabel fpsLabel, timeLabel;
+    private JLabel fpsLabel, timeLabel, xResLabel, yResLabel;
     private int fps, aniTime;
     private int frameCount;
 
     // Constant Variables
-    private final String DEFAULTSRC = "res/MillenniumForce.jpg";
-    private final String DEFAULTDEST = "res/Maverick.jpg";
+    private final String DEFAULTSRC = "res/Seales.jpg";
+    private final String DEFAULTDEST = "res/Jesus.jpg";
 
     public MainFrame()
     {
@@ -50,8 +50,12 @@ public class MainFrame extends JFrame
         mainPanel.setLayout(layout);
         setLayout(new BorderLayout());
 
+        gridWidth = 10;
+        gridHeight = 10;
+
         initMenu();
         initFrame();
+        initSliders();
 
         add(mainPanel, BorderLayout.SOUTH);
         pack();
@@ -63,13 +67,26 @@ public class MainFrame extends JFrame
     }
 
     /*
+    This function resets the frame.
+    It is usually called when the control grid resolution changes or something else changes
+    such that we must dump the previous data.
+     */
+    public void resetFrame()
+    {
+        // Remove the grid panels
+        mainPanel.remove(sourcePanel);
+        mainPanel.remove(destPanel);
+
+        // Do it all over again
+        initFrame();
+
+        pack();
+    }
+    /*
     This function initializes everything the user sees in the frame.
      */
     public void initFrame()
     {
-        gridWidth = 10;
-        gridHeight = 10;
-
         // Add two full grid panels
         sourcePanel = new FullGridPanel(gridWidth, gridHeight, true, DEFAULTSRC);
         destPanel = new FullGridPanel(gridWidth, gridHeight, true, DEFAULTDEST, sourcePanel.getPanelWidth(), sourcePanel.getPanelHeight());
@@ -85,11 +102,19 @@ public class MainFrame extends JFrame
         constraints.gridy = 0;
         mainPanel.add(destPanel);
 
+    }
+
+    /* This function initializes the sliders.
+     */
+    public void initSliders()
+    {
         // Slider init:
 
         // setting labels
         fpsLabel = new JLabel("FPS: 60");
         timeLabel = new JLabel("Time: 1 second(s)");
+        xResLabel = new JLabel("X Resolution: 10");
+        yResLabel = new JLabel("Y Resolution: 10");
 
         //fps slider init
         swingSliderFps = new JSlider(JSlider.HORIZONTAL, 1, 60, 30);
@@ -104,6 +129,20 @@ public class MainFrame extends JFrame
         swingSliderTime.setPaintLabels(true);
         swingSliderTime.setPaintTicks(true);
         swingSliderTime.setPreferredSize(new Dimension(200,30));
+
+        // Control Point X Resolution Slider
+        controlPointXResolutionSlider = new JSlider(JSlider.HORIZONTAL, 5, 25, 10);
+        controlPointXResolutionSlider.setLayout(new BorderLayout());
+        controlPointXResolutionSlider.setPaintLabels(true);
+        controlPointXResolutionSlider.setPaintTicks(true);
+        controlPointXResolutionSlider.setPreferredSize(new Dimension(200,30));
+
+        // Control Point Y Resolution Slider
+        controlPointYResolutionSlider = new JSlider(JSlider.HORIZONTAL, 5, 25, 10);
+        controlPointYResolutionSlider.setLayout(new BorderLayout());
+        controlPointYResolutionSlider.setPaintLabels(true);
+        controlPointYResolutionSlider.setPaintTicks(true);
+        controlPointYResolutionSlider.setPreferredSize(new Dimension(200,30));
     }
 
     /*
@@ -179,6 +218,60 @@ public class MainFrame extends JFrame
             }
         });
 
+        // Menu for allowing users to adjust control grid resolution
+        resolutionItem = new JMenuItem("Control Grid Resolution");
+        resolutionItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                // make another frame pop-up for slider adjustment
+                adjFrame = new JFrame("Adjust Control Grid Resolution");
+                adjFrame.setLayout(new GridLayout(2, 0));
+                adjPanel = new JPanel();
+
+                //setting layout on the adjPanel
+                gridLayout = new GridLayout(0,2);
+                adjPanel.setLayout(gridLayout);
+
+                // adding labels overtop the sliders
+                adjPanel.add(xResLabel);
+                adjPanel.add(yResLabel);
+
+                //adding the sliders to the frame/panel
+                adjPanel.add(controlPointXResolutionSlider);
+                adjPanel.add(controlPointYResolutionSlider);
+                adjFrame.getContentPane().add(adjPanel);
+
+                //adjFrame.setSize(745, 470);
+                adjFrame.pack();
+                adjFrame.setVisible(true);
+
+                controlPointXResolutionSlider.addChangeListener(new ChangeListener() {
+                    public void stateChanged(ChangeEvent e) {
+                        xResLabel.setText("X Resolution: " + controlPointXResolutionSlider.getValue());
+                    }
+                });
+
+                controlPointYResolutionSlider.addChangeListener(new ChangeListener() {
+                    public void stateChanged(ChangeEvent e) {
+                        yResLabel.setText("Y Resolution: " + controlPointYResolutionSlider.getValue());
+                    }
+                });
+
+                // Add a button that will apply the changes
+                JButton applyChanges = new JButton("Apply");
+                applyChanges.addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        gridWidth = controlPointXResolutionSlider.getValue();
+                        gridHeight = controlPointYResolutionSlider.getValue();
+                        resetFrame();
+                        adjFrame.dispatchEvent(new WindowEvent(adjFrame, WindowEvent.WINDOW_CLOSING));
+                    }
+                });
+                adjFrame.add(applyChanges);
+            }
+        });
+
 
         previewItem = new JMenuItem("Preview Animation");
         previewItem.addActionListener(new ActionListener() {
@@ -209,6 +302,7 @@ public class MainFrame extends JFrame
         });
         animationMenu.add(previewItem);
         animationMenu.add(adjItem);
+        animationMenu.add(resolutionItem);
 
         add(menuBar, BorderLayout.NORTH);
     }
