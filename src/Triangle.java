@@ -15,6 +15,11 @@ public class Triangle {
         this.p3 = p3;
     }
 
+    public boolean equals(Triangle other)
+    {
+        return this.p1.equals(other.p1) && this.p2.equals(other.p2) && this.p3.equals(other.p3);
+    }
+
     public int getX(int i) {
         switch(i)
         {

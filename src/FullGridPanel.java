@@ -128,6 +128,20 @@ public class FullGridPanel extends JPanel
 
 
     // Getters/setters
+    public GridPoint[][] getPoints()
+    {
+        GridPoint[][] toReturn = new GridPoint[points.length][];
+        for (int i = 0; i < points.length; i++)
+        {
+            toReturn[i] = new GridPoint[points[i].length];
+            for (int j = 0; j < points[i].length; j++)
+            {
+                toReturn[i][j] = new GridPoint(points[i][j]);
+            }
+        }
+
+        return toReturn;
+    }
     public GridPoint getPoint(int gridx, int gridy) { return points[gridx][gridy]; }
     public int getPanelWidth() { return width; }
     public int getPanelHeight() { return height; }

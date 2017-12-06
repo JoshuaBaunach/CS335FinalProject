@@ -15,7 +15,7 @@ import java.util.Vector;
 public class PreviewFrame extends JFrame {
 
     // Private vars
-    private FullGridPanel panel;
+    private PreviewGridPanel panel;
     private Vector<TweenDataPoint> tweens;
     BufferedImage b1, b2, intermediate;
     private Timer animationTimer;
@@ -34,7 +34,8 @@ public class PreviewFrame extends JFrame {
     /*
     This function initializes the frame to the beginning of the preview.
      */
-    public void init(int fps, int frameCount, int gridWidth, int gridHeight, BufferedImage b1, BufferedImage b2)
+    public void init(int fps, int frameCount, int gridWidth, int gridHeight, BufferedImage b1, BufferedImage b2,
+                     GridPoint[][] sourcePoints, GridPoint[][] destPoints)
     {
         animationTimer.cancel();
         animationTimer = new Timer();
@@ -44,9 +45,10 @@ public class PreviewFrame extends JFrame {
         this.b1 = b1;
         this.b2 = b2;
 
-        panel = new PreviewGridPanel(gridWidth, gridHeight, false, b1, b2);
+        panel = new PreviewGridPanel(gridWidth, gridHeight, false, b1, b2, sourcePoints, destPoints);
         for (int i = 0; i < tweens.size(); i++)
             panel.getPoint(tweens.get(i).gridX, tweens.get(i).gridY).setMoved(true);
+        panel.applyMorph();
         add(panel);
         pack();
         frameDelay = 1000 / fps;
@@ -73,8 +75,14 @@ public class PreviewFrame extends JFrame {
                 panel.getPoint(tweens.get(i).gridX, tweens.get(i).gridY).repaint();
             }
 
+            // Morph the images
+
+
             currentFrame = ((currentFrame) % frameCount) + 1;
 
+            panel.setStage((float)currentFrame / (float)frameCount);
+
+            panel.applyMorph();
             animationTimer.schedule(new AnimationTimerTask(), frameDelay);
         }
     }

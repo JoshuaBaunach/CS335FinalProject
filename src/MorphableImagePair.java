@@ -23,6 +23,29 @@ public class MorphableImagePair extends MorphableImage {
         repaint();
     }
 
+    /*
+    This function morphs using four different triangles.
+    It applies morphing to both the source image using super() and the destination image.
+     */
+    public void warpOtherBim(Point srcPoint, Point destPoint, int minX, int minY, int maxX, int maxY)
+    {
+        Triangle ta1 = new Triangle(new Point(minX,minY), srcPoint, new Point(maxX,minY));
+        Triangle ta2 = new Triangle(new Point(minX,minY), destPoint, new Point(maxX,minY));
+        Triangle tb1 = new Triangle(new Point(minX,maxY), srcPoint, new Point(maxX, maxY));
+        Triangle tb2 = new Triangle(new Point(minX,maxY), destPoint, new Point(maxX,maxY));
+        Triangle tc1 = new Triangle(new Point(minX,minY), srcPoint, new Point(minX, maxY));
+        Triangle tc2 = new Triangle(new Point(minX,minY), destPoint, new Point(minX,maxY));
+        Triangle td1 = new Triangle(new Point(maxX,minY), srcPoint, new Point(maxX, maxY));
+        Triangle td2 = new Triangle(new Point(maxX,minY), destPoint, new Point(maxX,maxY));
+
+        warpTriangle(otherBim, otherWarpedBim, ta1, ta2, null, null);
+        warpTriangle(otherBim, otherWarpedBim, tb1, tb2, null, null);
+        warpTriangle(otherBim, otherWarpedBim, tc1, tc2, null, null);
+        warpTriangle(otherBim, otherWarpedBim, td1, td2, null, null);
+        showWarped = true;
+        repaint();
+    }
+
     public BufferedImage getOtherBufferedImage() { return showWarped ? otherWarpedBim : otherBim; }
 
     public void paintComponent(Graphics g)

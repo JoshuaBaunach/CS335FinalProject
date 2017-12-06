@@ -90,18 +90,18 @@ public class GridPoint extends JPanel
             if (rubberbanding)
             {
                 // If mouse x is out of bounds, set the x pos to the bound
-                if (e.getX() > pointWidth)
-                    controlX = pointWidth;
-                else if (e.getX() < 0)
-                    controlX = 0;
+                if (e.getX() > pointWidth-POINTRADIUS)
+                    controlX = pointWidth-POINTRADIUS;
+                else if (e.getX() < POINTRADIUS)
+                    controlX = POINTRADIUS;
                 else
                     controlX = e.getX();
 
                 // If mouse y is out of bounds, set the y pos to the bound
-                if (e.getY() > pointHeight)
-                    controlY = pointHeight;
-                else if (e.getY() < 0)
-                    controlY = 0;
+                if (e.getY() > pointHeight-POINTRADIUS)
+                    controlY = pointHeight-POINTRADIUS;
+                else if (e.getY() < POINTRADIUS)
+                    controlY = POINTRADIUS;
                 else
                     controlY = e.getY();
 
@@ -115,9 +115,12 @@ public class GridPoint extends JPanel
     {
         public void mousePressed(MouseEvent e)
         {
-            // Determine if the mouse is within the control point
-            double mouseDist = Math.sqrt(Math.pow(e.getX() - controlX, 2) + Math.pow(e.getY() - controlY, 2));
-            if (mouseDist <= (float)POINTRADIUS)
+            // Determine if the mouse is within the control point box
+            // Old calculations:
+            //double mouseDist = Math.sqrt(Math.pow(e.getX() - controlX, 2) + Math.pow(e.getY() - controlY, 2));
+            //if (mouseDist <= (float)POINTRADIUS)
+
+            if ((e.getX() >= 0 && e.getX() <= pointWidth) && (e.getY() >= 0 && e.getY() <= pointHeight))
             {
                 rubberbanding = true;
                 moved = true;

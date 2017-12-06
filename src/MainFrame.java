@@ -92,14 +92,14 @@ public class MainFrame extends JFrame
         timeLabel = new JLabel("Time: 1 second(s)");
 
         //fps slider init
-        swingSliderFps = new JSlider(JSlider.HORIZONTAL, 1, 60, 60);
+        swingSliderFps = new JSlider(JSlider.HORIZONTAL, 1, 60, 30);
         swingSliderFps.setLayout(new BorderLayout());
         swingSliderFps.setPaintLabels(true);
         swingSliderFps.setPaintTicks(true);
         swingSliderFps.setPreferredSize(new Dimension(200,30));
 
         // time slider init
-        swingSliderTime = new JSlider(JSlider.HORIZONTAL, 1, 5, 1);
+        swingSliderTime = new JSlider(JSlider.HORIZONTAL, 1, 5, 3);
         swingSliderTime.setLayout(new BorderLayout());
         swingSliderTime.setPaintLabels(true);
         swingSliderTime.setPaintTicks(true);
@@ -203,7 +203,7 @@ public class MainFrame extends JFrame
 
                 // init the previewFrame
                 previewFrame.init(fps, frameCount, gridWidth, gridHeight, sourcePanel.getMorphableImage().getBufferedImage(),
-                        destPanel.getMorphableImage().getBufferedImage());
+                        destPanel.getMorphableImage().getBufferedImage(), sourcePanel.getPoints(), destPanel.getPoints());
                 previewFrame.setVisible(true);
             }
         });

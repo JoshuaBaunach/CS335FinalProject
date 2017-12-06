@@ -113,52 +113,60 @@ public class MorphableImage extends JLabel {
                              Object ALIASING,
                              Object INTERPOLATION)
     {
+        AffineTransform af;
+
         if (ALIASING == null)
             ALIASING = RenderingHints.VALUE_ANTIALIAS_ON;
         if (INTERPOLATION == null)
             INTERPOLATION = RenderingHints.VALUE_INTERPOLATION_BICUBIC;
 
-        // Create matrices that will be used in solving and fill them with the necessary values
-        double[][] a = new double[3][3];
-        double[][] b = new double[3][3];
-        double[] destx = new double[3];
-        double[] desty = new double[3];
+        // If the two triangles are not the same as each other, morph
+        if (!S.equals(D)) {
+            // Create matrices that will be used in solving and fill them with the necessary values
+            double[][] a = new double[3][3];
+            double[][] b = new double[3][3];
+            double[] destx = new double[3];
+            double[] desty = new double[3];
 
-        for (int i = 0; i < 3; ++i)
-        {
-            a[i][0] = S.getX(i);
-            a[i][1] = S.getY(i);
-            a[i][2] = 1.0;
-            b[i][0] = S.getX(i);
-            b[i][1] = S.getY(i);
-            b[i][2] = 1.0;
-            destx[i] = D.getX(i);
-            desty[i] = D.getY(i);
+            for (int i = 0; i < 3; ++i) {
+                a[i][0] = S.getX(i);
+                a[i][1] = S.getY(i);
+                a[i][2] = 1.0;
+                b[i][0] = S.getX(i);
+                b[i][1] = S.getY(i);
+                b[i][2] = 1.0;
+                destx[i] = D.getX(i);
+                desty[i] = D.getY(i);
+            }
+
+            // Create the matrices that will have the solutions to the previously created matrices
+            Matrix aMat = new Matrix(a);
+            Matrix bMat = new Matrix(b);
+            Matrix xVec = new Matrix(destx, 3);
+            Matrix yVec = new Matrix(desty, 3);
+
+            Matrix aVec = aMat.solve(xVec);
+            Matrix bVec = bMat.solve(yVec);
+
+            double[] aArray = aVec.getColumnPackedCopy();
+            double[] bArray = bVec.getColumnPackedCopy();
+
+            // Apply the affine transform
+            af = new AffineTransform(aArray[0], bArray[0], aArray[1],
+                    bArray[1], aArray[2], bArray[2]);
+
         }
-
-        // Create the matrices that will have the solutions to the previously created matrices
-        Matrix aMat = new Matrix(a);
-        Matrix bMat = new Matrix(b);
-        Matrix xVec = new Matrix(destx, 3);
-        Matrix yVec = new Matrix(desty, 3);
-
-        Matrix aVec = aMat.solve(xVec);
-        Matrix bVec = bMat.solve(yVec);
-
-        double[] aArray = aVec.getColumnPackedCopy();
-        double[] bArray = bVec.getColumnPackedCopy();
-
-        // Apply the affine transform
-        AffineTransform af = new AffineTransform(aArray[0], bArray[0], aArray[1],
-                bArray[1], aArray[2], bArray[2]);
+        else
+        {
+            af = new AffineTransform(1,0,0,1,0,0);
+        }
 
         GeneralPath destPath = new GeneralPath(GeneralPath.WIND_EVEN_ODD);
 
-        destPath.moveTo((float)D.getX(0), (float)D.getY(0));
-        destPath.lineTo((float)D.getX(1), (float)D.getY(1));
-        destPath.lineTo((float)D.getX(2), (float)D.getY(2));
-        destPath.lineTo((float)D.getX(0), (float)D.getY(0));
-
+        destPath.moveTo((float) D.getX(0), (float) D.getY(0));
+        destPath.lineTo((float) D.getX(1), (float) D.getY(1));
+        destPath.lineTo((float) D.getX(2), (float) D.getY(2));
+        destPath.lineTo((float) D.getX(0), (float) D.getY(0));
         Graphics2D g2 = dest.createGraphics();
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, ALIASING);
         g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, INTERPOLATION);
@@ -173,7 +181,7 @@ public class MorphableImage extends JLabel {
     /*
     This function morphs using four different triangles.
      */
-    public void warpMe(Point srcPoint, Point destPoint, int minX, int minY, int maxX, int maxY)
+    public void warpBim(Point srcPoint, Point destPoint, int minX, int minY, int maxX, int maxY)
     {
         Triangle ta1 = new Triangle(new Point(minX,minY), srcPoint, new Point(maxX,minY));
         Triangle ta2 = new Triangle(new Point(minX,minY), destPoint, new Point(maxX,minY));
