@@ -6,6 +6,7 @@ import javax.swing.*;
 import java.awt.event.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.util.Stack;
 
 public class FullGridPanel extends JPanel
 {
@@ -19,10 +20,16 @@ public class FullGridPanel extends JPanel
     protected GridPoint[][] points;
     protected FullGridPanel partnerPanel;
     protected MorphableImage image;
+    protected Point mousePoint;
 
     // Default Constructor
     public FullGridPanel()
     {}
+
+    /*
+    Welcome to constructor Hell.
+    Population: Josh, after being informed of a critical design flaw.
+     */
 
     // Constructor 1: Only image directory is specified
     public FullGridPanel(int gridWidth, int gridHeight, boolean editMode, String imageDir)
@@ -33,6 +40,7 @@ public class FullGridPanel extends JPanel
         image = new MorphableImage(imageDir);
         this.width = image.getBimWidth();
         this.height = image.getBimHeight();
+        this.mousePoint = new Point();
 
         // If image is too big, scale it down
         if (this.width > 750 || this.height > 500)
@@ -46,13 +54,7 @@ public class FullGridPanel extends JPanel
         pointWidth = width / gridWidth;
         pointHeight = height / gridHeight;
 
-        layout = new GridBagLayout();
-        c = new GridBagConstraints();
-        c.anchor = GridBagConstraints.FIRST_LINE_START;
-        c.weightx = 1;
-        c.weighty = 1;
-        c.fill = GridBagConstraints.BOTH;
-        setLayout(layout);
+        setLayout(null);
 
         points = new GridPoint[gridWidth][gridHeight];
 
@@ -61,9 +63,24 @@ public class FullGridPanel extends JPanel
             for (int j = 0; j < gridHeight; j++)
             {
                 points[i][j] = new GridPoint(pointWidth, pointHeight);
-                c.gridx = i;
-                c.gridy = j;
-                add(points[i][j], c);
+
+                // Assign neighbor points to this point, if applicable
+                if (i > 0)
+                {
+                    points[i][j].setWestNeighbor(points[i-1][j]);
+                    points[i-1][j].setEastNeighbor(points[i][j]);
+                }
+                if (j > 0)
+                {
+                    points[i][j].setNorthNeighbor(points[i][j-1]);
+                    points[i][j-1].setSouthNeighbor(points[i][j]);
+                }
+
+                //add(points[i][j], c);
+                add(points[i][j]);
+                points[i][j].setSize(new Dimension(GridPoint.POINTRADIUS*2, GridPoint.POINTRADIUS*2));
+                points[i][j].setLocation(new Point((pointWidth * i) + (pointWidth / 2) - GridPoint.POINTRADIUS, (pointHeight * j) + (pointHeight / 2) - GridPoint.POINTRADIUS));
+                points[i][j].setParentPanel(this);
             }
         }
 
@@ -77,27 +94,45 @@ public class FullGridPanel extends JPanel
         image = new MorphableImage(imageDir, width, height);
         this.width = image.getBimWidth();
         this.height = image.getBimHeight();
+        this.mousePoint = new Point();
 
+        // If image is too big, scale it down
+        if (this.width > 750 || this.height > 500) {
+            int newWidth = this.width > 750 ? 750 : this.width;
+            int newHeight = this.height > 500 ? 500 : this.height;
+            image = new MorphableImage(imageDir, newWidth, newHeight);
+            this.width = image.getBimWidth();
+            this.height = image.getBimHeight();
+        }
         pointWidth = width / gridWidth;
         pointHeight = height / gridHeight;
-        layout = new GridBagLayout();
-        c = new GridBagConstraints();
-        c.anchor = GridBagConstraints.FIRST_LINE_START;
-        c.weightx = 1;
-        c.weighty = 1;
-        c.fill = GridBagConstraints.BOTH;
-        setLayout(layout);
+
+        setLayout(null);
 
         points = new GridPoint[gridWidth][gridHeight];
 
         for (int i = 0; i < gridWidth; i++) {
             for (int j = 0; j < gridHeight; j++) {
                 points[i][j] = new GridPoint(pointWidth, pointHeight);
-                c.gridx = i;
-                c.gridy = j;
-                add(points[i][j], c);
+
+                // Assign neighbor points to this point, if applicable
+                if (i > 0) {
+                    points[i][j].setWestNeighbor(points[i - 1][j]);
+                    points[i - 1][j].setEastNeighbor(points[i][j]);
+                }
+                if (j > 0) {
+                    points[i][j].setNorthNeighbor(points[i][j - 1]);
+                    points[i][j - 1].setSouthNeighbor(points[i][j]);
+                }
+
+                //add(points[i][j], c);
+                add(points[i][j]);
+                points[i][j].setSize(new Dimension(GridPoint.POINTRADIUS * 2, GridPoint.POINTRADIUS * 2));
+                points[i][j].setLocation(new Point((pointWidth * i) + (pointWidth / 2) - GridPoint.POINTRADIUS, (pointHeight * j) + (pointHeight / 2) - GridPoint.POINTRADIUS));
+                points[i][j].setParentPanel(this);
             }
         }
+
     }
 
     /*
@@ -109,40 +144,37 @@ public class FullGridPanel extends JPanel
         this.gridWidth = gridWidth;
         this.gridHeight = gridHeight;
 
-        this.image = new MorphableImage(bim);
+        image = new MorphableImage(bim);
         this.width = image.getBimWidth();
         this.height = image.getBimHeight();
+        this.mousePoint = new Point();
 
-        // If image is too big, scale it down
-        if (this.width > 750 || this.height > 500)
-        {
-            int newWidth = this.width > 750 ? 750 : this.width;
-            int newHeight = this.height > 500 ? 500 : this.height;
-            image  = new MorphableImage(bim);
-            this.width = image.getBimWidth();
-            this.height = image.getBimHeight();
-        }
         pointWidth = width / gridWidth;
         pointHeight = height / gridHeight;
 
-        layout = new GridBagLayout();
-        c = new GridBagConstraints();
-        c.anchor = GridBagConstraints.FIRST_LINE_START;
-        c.weightx = 1;
-        c.weighty = 1;
-        c.fill = GridBagConstraints.BOTH;
-        setLayout(layout);
+        setLayout(null);
 
         points = new GridPoint[gridWidth][gridHeight];
 
-        for (int i = 0; i < gridWidth; i++)
-        {
-            for (int j = 0; j < gridHeight; j++)
-            {
+        for (int i = 0; i < gridWidth; i++) {
+            for (int j = 0; j < gridHeight; j++) {
                 points[i][j] = new GridPoint(pointWidth, pointHeight);
-                c.gridx = i;
-                c.gridy = j;
-                add(points[i][j], c);
+
+                // Assign neighbor points to this point, if applicable
+                if (i > 0) {
+                    points[i][j].setWestNeighbor(points[i - 1][j]);
+                    points[i - 1][j].setEastNeighbor(points[i][j]);
+                }
+                if (j > 0) {
+                    points[i][j].setNorthNeighbor(points[i][j - 1]);
+                    points[i][j - 1].setSouthNeighbor(points[i][j]);
+                }
+
+                //add(points[i][j], c);
+                add(points[i][j]);
+                points[i][j].setSize(new Dimension(GridPoint.POINTRADIUS * 2, GridPoint.POINTRADIUS * 2));
+                points[i][j].setLocation(new Point((pointWidth * i) + (pointWidth / 2) - GridPoint.POINTRADIUS, (pointHeight * j) + (pointHeight / 2) - GridPoint.POINTRADIUS));
+                points[i][j].setParentPanel(this);
             }
         }
 
@@ -168,7 +200,19 @@ public class FullGridPanel extends JPanel
     public int getPanelWidth() { return width; }
     public int getPanelHeight() { return height; }
     public MorphableImage getMorphableImage() { return image; }
+    public Point getMousePoint() { return new Point(MouseInfo.getPointerInfo().getLocation().x - getLocationOnScreen().x,
+            MouseInfo.getPointerInfo().getLocation().y - getLocationOnScreen().y); }
 
+    public void setPoints(Point[][] points)
+    {
+        for (int i = 0; i < gridWidth; i++)
+        {
+            for (int j = 0; j < gridHeight; j++)
+            {
+                this.points[i][j].setControlPoint(points[i][j]);
+            }
+        }
+    }
     public void setMorphableImage(MorphableImage image) { this.image = image; }
 
 
@@ -208,6 +252,59 @@ public class FullGridPanel extends JPanel
         g2d.setStroke(new BasicStroke(5));
         g2d.drawRect(0, 0, pointWidth * gridWidth, pointHeight * gridHeight);
         g2d.setStroke(oldStroke);
+
+        // Draw lines between each of the neighbor points
+
+        for (int i = 0; i < gridWidth; i++)
+        {
+            for (int j = 0; j < gridHeight; j++)
+            {
+                // Draw blue if this particular point is being dragged
+                if (points[i][j].getRubberbanding())
+                    g.setColor(Color.BLUE);
+                else
+                    g.setColor(Color.WHITE);
+                if (points[i][j].getEastNeighbor() != null) {
+                    // Draw blue if this point's east neighbor is being dragged
+                    if (points[i][j].getEastNeighbor().getRubberbanding())
+                        g.setColor(Color.BLUE);
+                    else if (!points[i][j].getRubberbanding())
+                        g.setColor(Color.WHITE);
+                    g.drawLine(points[i][j].getLocation().x + GridPoint.POINTRADIUS, points[i][j].getLocation().y + GridPoint.POINTRADIUS,
+                            points[i][j].getEastNeighbor().getLocation().x + GridPoint.POINTRADIUS, points[i][j].getEastNeighbor().getLocation().y + GridPoint.POINTRADIUS);
+                    if (points[i][j].getEastNeighbor().getSouthNeighbor() != null)
+                    {
+                        // Draw blue if this point's southeast neighbor is being dragged
+                        if (points[i][j].getEastNeighbor().getSouthNeighbor().getRubberbanding())
+                            g.setColor(Color.BLUE);
+                        else if (!points[i][j].getRubberbanding())
+                            g.setColor(Color.WHITE);
+                        g.drawLine(points[i][j].getLocation().x + GridPoint.POINTRADIUS, points[i][j].getLocation().y + GridPoint.POINTRADIUS,
+                                points[i][j].getEastNeighbor().getSouthNeighbor().getLocation().x + GridPoint.POINTRADIUS, points[i][j].getEastNeighbor().getSouthNeighbor().getLocation().y + GridPoint.POINTRADIUS);
+                    }
+                }
+                if (points[i][j].getSouthNeighbor() != null) {
+                    // Draw blue if this point's south neighbor is being dragged
+                    if (points[i][j].getSouthNeighbor().getRubberbanding())
+                        g.setColor(Color.BLUE);
+                    else if (!points[i][j].getRubberbanding())
+                        g.setColor(Color.WHITE);
+                    g.drawLine(points[i][j].getLocation().x + GridPoint.POINTRADIUS, points[i][j].getLocation().y + GridPoint.POINTRADIUS,
+                            points[i][j].getSouthNeighbor().getLocation().x + GridPoint.POINTRADIUS, points[i][j].getSouthNeighbor().getLocation().y + GridPoint.POINTRADIUS);
+                    /*if (points[i][j].getSouthNeighbor().getWestNeighbor() != null)
+                    {
+                        // Draw blue if this point's southwest neighbor is being dragged
+                        if (points[i][j].getSouthNeighbor().getWestNeighbor().getRubberbanding())
+                            g.setColor(Color.BLUE);
+                        else if (!points[i][j].getRubberbanding())
+                            g.setColor(Color.WHITE);
+                        g.drawLine(points[i][j].getLocation().x + GridPoint.POINTRADIUS, points[i][j].getLocation().y + GridPoint.POINTRADIUS,
+                                points[i][j].getSouthNeighbor().getWestNeighbor().getLocation().x + GridPoint.POINTRADIUS, points[i][j].getSouthNeighbor().getWestNeighbor().getLocation().y + GridPoint.POINTRADIUS);
+                    }*/
+                }
+            }
+        }
+
     }
 
     public Dimension getPreferredSize()

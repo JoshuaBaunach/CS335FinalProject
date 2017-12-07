@@ -7,9 +7,11 @@ his/her usage of the application.
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.event.*;
 import java.awt.*;
-import java.io.File;
+import java.io.*;
+import java.util.StringTokenizer;
 import java.util.Vector;
 
 public class MainFrame extends JFrame
@@ -24,10 +26,12 @@ public class MainFrame extends JFrame
     private JMenuBar menuBar;
     private JMenu fileMenu, animationMenu; // Menus that will appear at the top of the menu bar
     private JMenu exportSubmenu; // Submenus
-    private JMenuItem newItem, openSrcItem, openDestItem, saveItem, exitItem, previewItem, adjItem, resolutionItem,
+    private JMenuItem newItem, openItem, openSrcItem, openDestItem, saveItem, exitItem, previewItem, adjItem, resolutionItem,
     exportJPEGItem;
 
-    private JFileChooser fileChooser;
+    private JFileChooser fileChooser, fileSelector;
+    private BufferedReader buffReader;
+    private PrintWriter writer;
     private int gridWidth, gridHeight, pointSize;
 
     private JSlider swingSliderFps, swingSliderTime, controlPointXResolutionSlider, controlPointYResolutionSlider;
@@ -205,7 +209,157 @@ public class MainFrame extends JFrame
                 }
             }
         });
+
+        openItem = new JMenuItem("Open");
+        openItem.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                // Allow user to select ONLY TXT files and pull data from them
+                fileSelector = new JFileChooser();
+                fileSelector.setCurrentDirectory(new java.io.File("."));
+                fileSelector.setDialogTitle("Open the saved txt file with data");
+                // only allowing the user to choose only txt files
+                //fileSelector.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+                //fileSelector.setAcceptAllFileFilterUsed(false);
+                fileSelector = new JFileChooser();
+                FileNameExtensionFilter filter = new FileNameExtensionFilter("TEXT FILES", "txt", "text");
+                fileSelector.setFileFilter(filter);
+
+                if (fileSelector.showOpenDialog(mainPanel) == JFileChooser.APPROVE_OPTION)
+                {
+                    System.out.println("getSelectedFile() : "
+                            +  fileSelector.getSelectedFile()); // selected "file" actually grabs the directory the user selected
+                    try {
+                        // getSelectedFile() returns the actual txt file
+                        // SWITCH FROM WRITE TO READ
+                        buffReader = new BufferedReader(new FileReader(fileSelector.getSelectedFile()));
+
+                        String line = buffReader.readLine(); // reed entire line
+                        StringTokenizer token = new StringTokenizer(line);
+
+                        // read single word and make it an int
+                        int numY = Integer.parseInt(token.nextToken()); // num of points in the Y dir
+                        int numX = Integer.parseInt(token.nextToken()); // num points in the x dir
+
+                        gridWidth = numX;
+                        gridHeight = numY;
+
+                        resetFrame();
+
+                        Point[][] newSourcePoints = new Point[numX][numY];
+                        Point[][] newDestPoints = new Point[numX][numY];
+
+                        // Get the source points
+                        for (int i = 0; i < numY; i++)
+                        {
+                            for (int j = 0; j < numX; j++)
+                            {
+                                // TODO init each point using the info we parsed
+                                line = buffReader.readLine(); // reed entire line
+                                token = new StringTokenizer(line);
+                                int curX = Integer.parseInt(token.nextToken());
+                                int curY = Integer.parseInt(token.nextToken());
+                                newSourcePoints[i][j] = new Point(curX, curY);
+                                //writer.println(gridPoints[i][j].getControlPoint().x + " " + gridPoints[i][j].getControlPoint().y);
+                            }
+                        }
+                        sourcePanel.setPoints(newSourcePoints);
+                        buffReader.readLine();
+                        // Get the destination points
+                        for (int i = 0; i < numY; i++)
+                        {
+                            for (int j = 0; j < numX; j++)
+                            {
+                                // TODO init each point using the info we parsed
+                                line = buffReader.readLine(); // reed entire line
+                                token = new StringTokenizer(line);
+                                int curX = Integer.parseInt(token.nextToken());
+                                int curY = Integer.parseInt(token.nextToken());
+                                newDestPoints[i][j] = new Point(curX, curY);
+                                //writer.println(gridPoints[i][j].getControlPoint().x + " " + gridPoints[i][j].getControlPoint().y);
+                            }
+                        }
+                        destPanel.setPoints(newDestPoints);
+
+                    }
+                    catch(FileNotFoundException e2) {
+                        e2.printStackTrace();
+
+                    }catch(IOException e2) {
+                        e2.printStackTrace();
+                    } finally
+                    {
+
+                    }
+                }
+                // user did not select anything
+                else {
+                    System.out.println("User did not select anything");
+                }
+            }});
         saveItem = new JMenuItem("Save");
+        saveItem.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                // save the data to a file
+                fileSelector = new JFileChooser();
+                fileSelector.setCurrentDirectory(new java.io.File("."));
+                fileSelector.setDialogTitle("Select which DIRECTORY you want to store the save file");
+                // only allowing the user to choose directories
+                fileSelector.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+                fileSelector.setAcceptAllFileFilterUsed(false);
+                if (fileSelector.showOpenDialog(mainPanel) == JFileChooser.APPROVE_OPTION)
+                {
+
+                    System.out.println("getSelectedFile() : "
+                            +  fileSelector.getSelectedFile()); // selected "file" actually grabs the directory the user selected
+                    try {
+                        writer = new PrintWriter(fileSelector.getSelectedFile() + "\\savedData.txt", "UTF-8");
+                        GridPoint[][] srcGridPoints = sourcePanel.getPoints();
+
+                        // for every grid point in the gridPoints array
+                        writer.println(srcGridPoints.length + " " + srcGridPoints[0].length);
+                        for (int i = 0; i < srcGridPoints.length; i++)
+                        {
+                            for (int j = 0; j < srcGridPoints[0].length; j++)
+                            {
+                                writer.println(srcGridPoints[i][j].getControlPoint().x + " " + srcGridPoints[i][j].getControlPoint().y);
+                            }
+                        }
+                        writer.println("DEST");
+                        GridPoint[][] destGridPoints = destPanel.getPoints();
+
+                        for (int i = 0; i < destGridPoints.length; i++)
+                        {
+                            for (int j = 0; j < destGridPoints[0].length; j++)
+                            {
+                                writer.println(destGridPoints[i][j].getControlPoint().x + " " + destGridPoints[i][j].getControlPoint().y);
+                            }
+                        }
+
+                        writer.println("MARKER"); // denote the end of the control points
+                        writer.println(fps);
+                        writer.println(aniTime);
+                        writer.close();
+                    }
+                    catch(FileNotFoundException e2) {
+                        e2.printStackTrace();
+
+                    }catch(UnsupportedEncodingException e2) {
+
+                        e2.printStackTrace();
+                    }
+                    finally
+                    {
+                        // closing file stream
+                        if(writer != null){
+                            writer.close();
+                        }
+                    }
+                }
+                // user did not select anything
+                else {
+                    System.out.println("User did not select anything");
+                }
+            }});
         exitItem = new JMenuItem("Exit");
         exitItem.addActionListener(new ActionListener() {
             //@Override
@@ -254,6 +408,7 @@ public class MainFrame extends JFrame
         fileMenu.add(newItem);
         fileMenu.add(openSrcItem);
         fileMenu.add(openDestItem);
+        fileMenu.add(openItem);
 
         fileMenu.addSeparator();
 

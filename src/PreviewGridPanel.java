@@ -74,6 +74,7 @@ public class PreviewGridPanel extends FullGridPanel{
         super.paintComponent(g);
         Graphics2D g2d = (Graphics2D) g;
 
+        // Draw the images on top of each other
         g.setColor(Color.BLACK);
         g.fillRect(0, 0, pointWidth * gridWidth, pointHeight * gridHeight);
         g2d.setComposite(AlphaComposite.SrcOver.derive(1.f - stage));

@@ -76,13 +76,12 @@ public class PreviewFrame extends JFrame {
             }
 
             // Morph the images
-
-
             currentFrame = ((currentFrame) % frameCount) + 1;
 
             panel.setStage((float)currentFrame / (float)frameCount);
 
             panel.applyMorph();
+            panel.repaint();
             animationTimer.schedule(new AnimationTimerTask(), frameDelay);
         }
     }
