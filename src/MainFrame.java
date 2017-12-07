@@ -220,7 +220,6 @@ public class MainFrame extends JFrame
                 // only allowing the user to choose only txt files
                 //fileSelector.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
                 //fileSelector.setAcceptAllFileFilterUsed(false);
-                fileSelector = new JFileChooser();
                 FileNameExtensionFilter filter = new FileNameExtensionFilter("TEXT FILES", "txt", "text");
                 fileSelector.setFileFilter(filter);
 
@@ -247,6 +246,9 @@ public class MainFrame extends JFrame
 
                         Point[][] newSourcePoints = new Point[numX][numY];
                         Point[][] newDestPoints = new Point[numX][numY];
+                        boolean[][] movedPoints = new boolean[numX][numY];
+                        boolean[][] partnerMovedSrcPoints = new boolean[numX][numY];
+                        boolean[][] partnerMovedDestPoints = new boolean[numX][numY];
 
                         // Get the source points
                         for (int i = 0; i < numY; i++)
@@ -258,11 +260,19 @@ public class MainFrame extends JFrame
                                 token = new StringTokenizer(line);
                                 int curX = Integer.parseInt(token.nextToken());
                                 int curY = Integer.parseInt(token.nextToken());
+                                movedPoints[i][j] = Boolean.parseBoolean(token.nextToken());
+                                partnerMovedDestPoints[i][j] = Boolean.parseBoolean(token.nextToken());
                                 newSourcePoints[i][j] = new Point(curX, curY);
                                 //writer.println(gridPoints[i][j].getControlPoint().x + " " + gridPoints[i][j].getControlPoint().y);
                             }
                         }
                         sourcePanel.setPoints(newSourcePoints);
+                        for (int i = 0; i < numX; i++)
+                        {
+                            for (int j = 0; j < numY; j++) {
+                                sourcePanel.getPoint(i, j).setMoved(movedPoints[i][j]);
+                            }
+                        }
                         buffReader.readLine();
                         // Get the destination points
                         for (int i = 0; i < numY; i++)
@@ -274,8 +284,18 @@ public class MainFrame extends JFrame
                                 token = new StringTokenizer(line);
                                 int curX = Integer.parseInt(token.nextToken());
                                 int curY = Integer.parseInt(token.nextToken());
+                                movedPoints[i][j] = Boolean.parseBoolean(token.nextToken());
+                                partnerMovedSrcPoints[i][j] = Boolean.parseBoolean(token.nextToken());
                                 newDestPoints[i][j] = new Point(curX, curY);
                                 //writer.println(gridPoints[i][j].getControlPoint().x + " " + gridPoints[i][j].getControlPoint().y);
+                            }
+                        }
+                        for (int i = 0; i < numX; i++)
+                        {
+                            for (int j = 0; j < numY; j++) {
+                                destPanel.getPoint(i, j).setMoved(movedPoints[i][j]);
+                                sourcePanel.getPoint(i, j).setPartnerMoved(partnerMovedSrcPoints[i][j]);
+                                destPanel.getPoint(i, j).setPartnerMoved(partnerMovedDestPoints[i][j]);
                             }
                         }
                         destPanel.setPoints(newDestPoints);
@@ -314,6 +334,7 @@ public class MainFrame extends JFrame
                     try {
                         writer = new PrintWriter(fileSelector.getSelectedFile() + "\\savedData.txt", "UTF-8");
                         GridPoint[][] srcGridPoints = sourcePanel.getPoints();
+                        GridPoint[][] destGridPoints = destPanel.getPoints();
 
                         // for every grid point in the gridPoints array
                         writer.println(srcGridPoints.length + " " + srcGridPoints[0].length);
@@ -321,17 +342,18 @@ public class MainFrame extends JFrame
                         {
                             for (int j = 0; j < srcGridPoints[0].length; j++)
                             {
-                                writer.println(srcGridPoints[i][j].getControlPoint().x + " " + srcGridPoints[i][j].getControlPoint().y);
+                                writer.println(srcGridPoints[i][j].getPointLocation().x + " " + srcGridPoints[i][j].getPointLocation().y + " " +
+                                        srcGridPoints[i][j].getMoved() + " " + destGridPoints[i][j].getPartnerMoved());
                             }
                         }
                         writer.println("DEST");
-                        GridPoint[][] destGridPoints = destPanel.getPoints();
 
                         for (int i = 0; i < destGridPoints.length; i++)
                         {
                             for (int j = 0; j < destGridPoints[0].length; j++)
                             {
-                                writer.println(destGridPoints[i][j].getControlPoint().x + " " + destGridPoints[i][j].getControlPoint().y);
+                                writer.println(destGridPoints[i][j].getPointLocation().x + " " + destGridPoints[i][j].getPointLocation().y + " " +
+                                        destGridPoints[i][j].getMoved() + " " + srcGridPoints[i][j].getPartnerMoved());
                             }
                         }
 

@@ -181,21 +181,15 @@ public class MorphableImage extends JLabel {
     /*
     This function morphs using four different triangles.
      */
-    public void warpBim(Point srcPoint, Point destPoint, int minX, int minY, int maxX, int maxY)
+    public void warpBim(Point vs1, Point vs2, Point vs3, Point vs4, Point vd1, Point vd2, Point vd3, Point vd4)
     {
-        Triangle ta1 = new Triangle(new Point(minX,minY), srcPoint, new Point(maxX,minY));
-        Triangle ta2 = new Triangle(new Point(minX,minY), destPoint, new Point(maxX,minY));
-        Triangle tb1 = new Triangle(new Point(minX,maxY), srcPoint, new Point(maxX, maxY));
-        Triangle tb2 = new Triangle(new Point(minX,maxY), destPoint, new Point(maxX,maxY));
-        Triangle tc1 = new Triangle(new Point(minX,minY), srcPoint, new Point(minX, maxY));
-        Triangle tc2 = new Triangle(new Point(minX,minY), destPoint, new Point(minX,maxY));
-        Triangle td1 = new Triangle(new Point(maxX,minY), srcPoint, new Point(maxX, maxY));
-        Triangle td2 = new Triangle(new Point(maxX,minY), destPoint, new Point(maxX,maxY));
+        Triangle tris1 = new Triangle(vs1, vs3, vs4);
+        Triangle tris2 = new Triangle(vs2, vs1, vs3);
+        Triangle trid1 = new Triangle(vd1, vd3, vd4);
+        Triangle trid2 = new Triangle(vd2, vd1, vd3);
 
-        warpTriangle(bim, warpedbim, ta1, ta2, null, null);
-        warpTriangle(bim, warpedbim, tb1, tb2, null, null);
-        warpTriangle(bim, warpedbim, tc1, tc2, null, null);
-        warpTriangle(bim, warpedbim, td1, td2, null, null);
+        warpTriangle(bim, warpedbim, tris1, trid1, null, null);
+        warpTriangle(bim, warpedbim, tris2, trid2, null, null);
         showWarped = true;
         repaint();
     }

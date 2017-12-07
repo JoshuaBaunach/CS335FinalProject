@@ -26,11 +26,6 @@ public class FullGridPanel extends JPanel
     public FullGridPanel()
     {}
 
-    /*
-    Welcome to constructor Hell.
-    Population: Josh, after being informed of a critical design flaw.
-     */
-
     // Constructor 1: Only image directory is specified
     public FullGridPanel(int gridWidth, int gridHeight, boolean editMode, String imageDir)
     {
@@ -79,7 +74,7 @@ public class FullGridPanel extends JPanel
                 //add(points[i][j], c);
                 add(points[i][j]);
                 points[i][j].setSize(new Dimension(GridPoint.POINTRADIUS*2, GridPoint.POINTRADIUS*2));
-                points[i][j].setLocation(new Point((pointWidth * i) + (pointWidth / 2) - GridPoint.POINTRADIUS, (pointHeight * j) + (pointHeight / 2) - GridPoint.POINTRADIUS));
+                points[i][j].setPointLocation(new Point((pointWidth * i) + (pointWidth / 2) - GridPoint.POINTRADIUS, (pointHeight * j) + (pointHeight / 2) - GridPoint.POINTRADIUS));
                 points[i][j].setParentPanel(this);
             }
         }
@@ -128,7 +123,7 @@ public class FullGridPanel extends JPanel
                 //add(points[i][j], c);
                 add(points[i][j]);
                 points[i][j].setSize(new Dimension(GridPoint.POINTRADIUS * 2, GridPoint.POINTRADIUS * 2));
-                points[i][j].setLocation(new Point((pointWidth * i) + (pointWidth / 2) - GridPoint.POINTRADIUS, (pointHeight * j) + (pointHeight / 2) - GridPoint.POINTRADIUS));
+                points[i][j].setPointLocation(new Point((pointWidth * i) + (pointWidth / 2) - GridPoint.POINTRADIUS, (pointHeight * j) + (pointHeight / 2) - GridPoint.POINTRADIUS));
                 points[i][j].setParentPanel(this);
             }
         }
@@ -173,7 +168,7 @@ public class FullGridPanel extends JPanel
                 //add(points[i][j], c);
                 add(points[i][j]);
                 points[i][j].setSize(new Dimension(GridPoint.POINTRADIUS * 2, GridPoint.POINTRADIUS * 2));
-                points[i][j].setLocation(new Point((pointWidth * i) + (pointWidth / 2) - GridPoint.POINTRADIUS, (pointHeight * j) + (pointHeight / 2) - GridPoint.POINTRADIUS));
+                points[i][j].setPointLocation(new Point((pointWidth * i) + (pointWidth / 2) - GridPoint.POINTRADIUS, (pointHeight * j) + (pointHeight / 2) - GridPoint.POINTRADIUS));
                 points[i][j].setParentPanel(this);
             }
         }
@@ -209,7 +204,7 @@ public class FullGridPanel extends JPanel
         {
             for (int j = 0; j < gridHeight; j++)
             {
-                this.points[i][j].setControlPoint(points[i][j]);
+                this.points[i][j].setPointLocation(points[i][j]);
             }
         }
     }
@@ -291,16 +286,6 @@ public class FullGridPanel extends JPanel
                         g.setColor(Color.WHITE);
                     g.drawLine(points[i][j].getLocation().x + GridPoint.POINTRADIUS, points[i][j].getLocation().y + GridPoint.POINTRADIUS,
                             points[i][j].getSouthNeighbor().getLocation().x + GridPoint.POINTRADIUS, points[i][j].getSouthNeighbor().getLocation().y + GridPoint.POINTRADIUS);
-                    /*if (points[i][j].getSouthNeighbor().getWestNeighbor() != null)
-                    {
-                        // Draw blue if this point's southwest neighbor is being dragged
-                        if (points[i][j].getSouthNeighbor().getWestNeighbor().getRubberbanding())
-                            g.setColor(Color.BLUE);
-                        else if (!points[i][j].getRubberbanding())
-                            g.setColor(Color.WHITE);
-                        g.drawLine(points[i][j].getLocation().x + GridPoint.POINTRADIUS, points[i][j].getLocation().y + GridPoint.POINTRADIUS,
-                                points[i][j].getSouthNeighbor().getWestNeighbor().getLocation().x + GridPoint.POINTRADIUS, points[i][j].getSouthNeighbor().getWestNeighbor().getLocation().y + GridPoint.POINTRADIUS);
-                    }*/
                 }
             }
         }

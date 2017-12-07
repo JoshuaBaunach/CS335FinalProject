@@ -36,32 +36,42 @@ public class PreviewGridPanel extends FullGridPanel{
     public void applyMorph()
     {
         // Go through each control point
-        for (int i = 0; i < points.length; i++)
+        for (int i = 0; i < points.length-1; i++)
         {
-            for (int j = 0; j < points[i].length; j++)
+            for (int j = 0; j < points[i].length-1; j++)
             {
-                // Derive the bounding box of the control point
-                int minX = j * pointWidth;
-                int maxX = (j * pointWidth) + pointWidth;
-                int minY = i * pointHeight;
-                int maxY = (i * pointHeight) + pointHeight;
+                // Determine the eight points - four in source, four in destination
+                Point vs1 = sourcePoints[i][j].getLocation();
+                Point vs2 = sourcePoints[i+1][j].getLocation();
+                Point vs3 = sourcePoints[i+1][j+1].getLocation();
+                Point vs4 = sourcePoints[i][j+1].getLocation();
+                Point vd1 = destPoints[i][j].getLocation();
+                Point vd2 = destPoints[i+1][j].getLocation();
+                Point vd3 = destPoints[i+1][j+1].getLocation();
+                Point vd4 = destPoints[i][j+1].getLocation();
 
-                // Apply the morph to the source image
-
-                // Determine how far away from the control point the source image should morph in the current stage
-                float srcImageSrcX = sourcePoints[i][j].getControlPoint().x + (pointWidth * j);
-                float srcImageSrcY = sourcePoints[i][j].getControlPoint().y + (pointHeight * i);
-                float srcImageDestX = destPoints[i][j].getControlPoint().x + (pointWidth * j);
-                float srcImageDestY = destPoints[i][j].getControlPoint().y + (pointHeight * i);
-                float newSrcImageX = srcImageSrcX + ((srcImageDestX - srcImageSrcX) * stage);
-                float newSrcImageY = srcImageSrcY + ((srcImageDestY - srcImageSrcY) * stage);
-                imgPair.warpBim(new Point((int)srcImageSrcX, (int)srcImageSrcY), new Point((int)newSrcImageX, (int)newSrcImageY), minX, minY, maxX, maxY);
-                //imgPair.warpBim(sourcePoints[i][j].getControlPoint(), destPoints[i][j].getControlPoint(), minX, minY, maxX, maxY);
+                // Apply morph to source image
+                // Determine how far away each of the points should morph in the current stage
+                Point newvd1 = new Point((int)((float)vs1.x + (((float)vd1.x - (float)vs1.x) * stage)),
+                        (int)((float)vs1.y + (((float)vd1.y - (float)vs1.y) * stage)));
+                Point newvd2 = new Point((int)((float)vs2.x + (((float)vd2.x - (float)vs2.x) * stage)),
+                        (int)((float)vs2.y + (((float)vd2.y - (float)vs2.y) * stage)));
+                Point newvd3 = new Point((int)((float)vs3.x + (((float)vd3.x - (float)vs3.x) * stage)),
+                        (int)((float)vs3.y + (((float)vd3.y - (float)vs3.y) * stage)));
+                Point newvd4 = new Point((int)((float)vs4.x + (((float)vd4.x - (float)vs4.x) * stage)),
+                        (int)((float)vs4.y + (((float)vd4.y - (float)vs4.y) * stage)));
+                imgPair.warpBim(vs1, vs2, vs3, vs4, newvd1, newvd2, newvd3, newvd4);
 
                 // Determine how far away from the control point the destination image should morph in the current stage
-                float newDestImageX = srcImageDestX + ((srcImageSrcX - srcImageDestX) * (1.f - stage));
-                float newDestImageY = srcImageDestY + ((srcImageSrcY - srcImageDestY) * (1.f - stage));
-                imgPair.warpOtherBim(new Point((int) srcImageDestX, (int) srcImageDestY), new Point((int)newDestImageX, (int)newDestImageY), minX, minY, maxX, maxY);
+                Point newvs1 = new Point((int)((float)vd1.x + (((float)vs1.x - (float)vd1.x) * (1.f - stage))),
+                        (int)((float)vd1.y + (((float)vs1.y - (float)vd1.y) * (1.f - stage))));
+                Point newvs2 = new Point((int)((float)vd2.x + (((float)vs2.x - (float)vd2.x) * (1.f - stage))),
+                        (int)((float)vd2.y + (((float)vs2.y - (float)vd2.y) * (1.f - stage))));
+                Point newvs3 = new Point((int)((float)vd3.x + (((float)vs3.x - (float)vd3.x) * (1.f - stage))),
+                        (int)((float)vd3.y + (((float)vs3.y - (float)vd3.y) * (1.f - stage))));
+                Point newvs4 = new Point((int)((float)vd4.x + (((float)vs4.x - (float)vd4.x) * (1.f - stage))),
+                        (int)((float)vd4.y + (((float)vs4.y - (float)vd4.y) * (1.f - stage))));
+                imgPair.warpOtherBim(newvs1, newvs2, newvs3, newvs4, vd1, vd2, vd3, vd4);
             }
         }
     }
@@ -90,5 +100,47 @@ public class PreviewGridPanel extends FullGridPanel{
         g2d.setStroke(new BasicStroke(5));
         g2d.drawRect(0, 0, pointWidth * gridWidth, pointHeight * gridHeight);
         g2d.setStroke(oldStroke);
+
+        // Draw lines between each of the neighbor points
+
+        for (int i = 0; i < gridWidth; i++)
+        {
+            for (int j = 0; j < gridHeight; j++)
+            {
+                // Draw blue if this particular point is being dragged
+                if (points[i][j].getRubberbanding())
+                    g.setColor(Color.BLUE);
+                else
+                    g.setColor(Color.WHITE);
+                if (points[i][j].getEastNeighbor() != null) {
+                    // Draw blue if this point's east neighbor is being dragged
+                    if (points[i][j].getEastNeighbor().getRubberbanding())
+                        g.setColor(Color.BLUE);
+                    else if (!points[i][j].getRubberbanding())
+                        g.setColor(Color.WHITE);
+                    g.drawLine(points[i][j].getLocation().x + GridPoint.POINTRADIUS, points[i][j].getLocation().y + GridPoint.POINTRADIUS,
+                            points[i][j].getEastNeighbor().getLocation().x + GridPoint.POINTRADIUS, points[i][j].getEastNeighbor().getLocation().y + GridPoint.POINTRADIUS);
+                    if (points[i][j].getEastNeighbor().getSouthNeighbor() != null)
+                    {
+                        // Draw blue if this point's southeast neighbor is being dragged
+                        if (points[i][j].getEastNeighbor().getSouthNeighbor().getRubberbanding())
+                            g.setColor(Color.BLUE);
+                        else if (!points[i][j].getRubberbanding())
+                            g.setColor(Color.WHITE);
+                        g.drawLine(points[i][j].getLocation().x + GridPoint.POINTRADIUS, points[i][j].getLocation().y + GridPoint.POINTRADIUS,
+                                points[i][j].getEastNeighbor().getSouthNeighbor().getLocation().x + GridPoint.POINTRADIUS, points[i][j].getEastNeighbor().getSouthNeighbor().getLocation().y + GridPoint.POINTRADIUS);
+                    }
+                }
+                if (points[i][j].getSouthNeighbor() != null) {
+                    // Draw blue if this point's south neighbor is being dragged
+                    if (points[i][j].getSouthNeighbor().getRubberbanding())
+                        g.setColor(Color.BLUE);
+                    else if (!points[i][j].getRubberbanding())
+                        g.setColor(Color.WHITE);
+                    g.drawLine(points[i][j].getLocation().x + GridPoint.POINTRADIUS, points[i][j].getLocation().y + GridPoint.POINTRADIUS,
+                            points[i][j].getSouthNeighbor().getLocation().x + GridPoint.POINTRADIUS, points[i][j].getSouthNeighbor().getLocation().y + GridPoint.POINTRADIUS);
+                }
+            }
+        }
     }
 }

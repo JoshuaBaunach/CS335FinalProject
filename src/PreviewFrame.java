@@ -65,13 +65,12 @@ public class PreviewFrame extends JFrame {
         public void run()
         {
             // Update all of the points
-            for (int i = 0; i < tweens.size(); i++)
-            {
-                Point startPoint = tweens.get(i).sourcePoint.getControlPoint();
-                Point endPoint = tweens.get(i).destPoint.getControlPoint();
-                float xInterp = (float)startPoint.x + (((float)endPoint.x - (float)startPoint.x) * ((float)currentFrame/(float)frameCount));
-                float yInterp = (float)startPoint.y + (((float)endPoint.y - (float)startPoint.y) * ((float)currentFrame/(float)frameCount));
-                panel.getPoint(tweens.get(i).gridX, tweens.get(i).gridY).setControlPoint(new Point((int)xInterp, (int)yInterp));
+            for (int i = 0; i < tweens.size(); i++) {
+                Point startPoint = tweens.get(i).sourcePoint.getPointLocation();
+                Point endPoint = tweens.get(i).destPoint.getPointLocation();
+                float xInterp = (float) startPoint.x + (((float) endPoint.x - (float) startPoint.x) * ((float) currentFrame / (float) frameCount));
+                float yInterp = (float) startPoint.y + (((float) endPoint.y - (float) startPoint.y) * ((float) currentFrame / (float) frameCount));
+                panel.getPoint(tweens.get(i).gridX, tweens.get(i).gridY).setPointLocation(new Point((int)xInterp, (int)yInterp));
                 panel.getPoint(tweens.get(i).gridX, tweens.get(i).gridY).repaint();
             }
 
