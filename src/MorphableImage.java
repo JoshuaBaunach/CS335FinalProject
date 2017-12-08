@@ -62,6 +62,7 @@ public class MorphableImage extends JLabel {
     }
 
     // Getters/Setters
+    public BufferedImage getBaseBufferedImage() { return basebim; }
     public BufferedImage getBufferedImage() { return showWarped ? warpedbim : bim; }
     public int getBimWidth() { return bim.getWidth(); }
     public int getBimHeight() { return bim.getHeight(); }

@@ -4,6 +4,9 @@ It will contain many of the components that will be visible to the user througho
 his/her usage of the application.
  */
 
+import org.apache.commons.io.FilenameUtils;
+
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -11,8 +14,13 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.event.*;
 import java.awt.*;
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.StringTokenizer;
 import java.util.Vector;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
+import java.util.zip.ZipOutputStream;
 
 public class MainFrame extends JFrame
 {
@@ -281,7 +289,7 @@ public class MainFrame extends JFrame
                 // only allowing the user to choose only txt files
                 //fileSelector.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
                 //fileSelector.setAcceptAllFileFilterUsed(false);
-                FileNameExtensionFilter filter = new FileNameExtensionFilter("TEXT FILES", "txt", "text");
+                FileNameExtensionFilter filter = new FileNameExtensionFilter("Morph Files", "mph", "morph files");
                 fileSelector.setFileFilter(filter);
 
                 if (fileSelector.showOpenDialog(mainPanel) == JFileChooser.APPROVE_OPTION)
@@ -291,8 +299,51 @@ public class MainFrame extends JFrame
                     try {
                         // getSelectedFile() returns the actual txt file
                         // SWITCH FROM WRITE TO READ
-                        buffReader = new BufferedReader(new FileReader(fileSelector.getSelectedFile()));
+                        //buffReader = new BufferedReader(new FileReader(fileSelector.getSelectedFile()));
+                        File dataFile = new File(fileSelector.getSelectedFile().getParent() + "/data.txt");
+                        File srcFile = new File(fileSelector.getSelectedFile().getParent() + "/src.jpg");
+                        File destFile = new File(fileSelector.getSelectedFile().getParent() + "/dest.jpg");
+                        byte[] b;
+                        int count;
 
+                        ZipInputStream zipInput = new ZipInputStream(new FileInputStream(fileSelector.getSelectedFile()));
+
+                        // Read the data file
+                        FileOutputStream dataOutput = new FileOutputStream(dataFile);
+                        zipInput.getNextEntry();
+
+                        b = new byte[1024];
+                        while ((count = zipInput.read(b)) > 0)
+                        {
+                            dataOutput.write(b, 0, count);
+                        }
+                        dataOutput.close();
+
+                        // Read the source image
+                        FileOutputStream srcOutput = new FileOutputStream(srcFile);
+                        zipInput.getNextEntry();
+
+                        b = new byte[1024];
+                        while ((count = zipInput.read(b)) > 0)
+                        {
+                            srcOutput.write(b, 0, count);
+                        }
+                        srcOutput.close();
+
+                        // Read the dest image
+                        FileOutputStream destOutput = new FileOutputStream(destFile);
+                        zipInput.getNextEntry();
+
+                        b = new byte[1024];
+                        while ((count = zipInput.read(b)) > 0)
+                        {
+                            destOutput.write(b, 0, count);
+                        }
+                        destOutput.close();
+
+                        zipInput.close();
+
+                        buffReader = new BufferedReader(new FileReader(fileSelector.getSelectedFile().getParent() + "/data.txt"));
                         String line = buffReader.readLine(); // reed entire line
                         StringTokenizer token = new StringTokenizer(line);
 
@@ -303,8 +354,12 @@ public class MainFrame extends JFrame
                         gridWidth = numX;
                         gridHeight = numY;
 
+                        // Create the new images
+                        srcDirectory = fileSelector.getSelectedFile().getParent() + "/src.jpg";
+                        destDirectory = fileSelector.getSelectedFile().getParent() + "/dest.jpg";
                         resetFrame();
 
+                        resetFrame();
                         Point[][] newSourcePoints = new Point[numX][numY];
                         Point[][] newDestPoints = new Point[numX][numY];
                         boolean[][] movedPoints = new boolean[numX][numY];
@@ -372,6 +427,7 @@ public class MainFrame extends JFrame
                         swingSliderFps.setValue(fps);
                         swingSliderTime.setValue(aniTime);
 
+
                     }
                     catch(FileNotFoundException e2) {
                         e2.printStackTrace();
@@ -394,7 +450,7 @@ public class MainFrame extends JFrame
                 // save the data to a file
                 fileSelector = new JFileChooser();
                 fileSelector.setCurrentDirectory(new java.io.File("./"));
-                fileSelector.setSelectedFile(new File("savefile.txt"));
+                fileSelector.setSelectedFile(new File("savefile.mph"));
                 fileSelector.setDialogTitle("Save Control Point Information");
                 // only allowing the user to choose directories
                 fileSelector.setApproveButtonText("Save");
@@ -403,9 +459,11 @@ public class MainFrame extends JFrame
                 {
 
                     System.out.println("getSelectedFile() : "
-                            +  fileSelector.getSelectedFile()); // selected "file" actually grabs the directory the user selected
+                            +  FilenameUtils.removeExtension(fileSelector.getSelectedFile().getName())); // selected "file" actually grabs the directory the user selected
+                    //File toWrite = new File(FilenameUtils.removeExtension(fileSelector.getSelectedFile().getAbsolutePath()) + ".txt");
+                    File toWrite = new File(fileSelector.getSelectedFile().getParent() + "/data.txt");
                     try {
-                        writer = new PrintWriter(fileSelector.getSelectedFile(), "UTF-8");
+                        writer = new PrintWriter(toWrite, "UTF-8");
                         GridPoint[][] srcGridPoints = sourcePanel.getPoints();
                         GridPoint[][] destGridPoints = destPanel.getPoints();
 
@@ -448,6 +506,101 @@ public class MainFrame extends JFrame
                         if(writer != null){
                             writer.close();
                         }
+                    }
+
+                    // Write the two buffered images to files
+                    try {
+                        ImageIO.write(sourcePanel.getMorphableImage().getBaseBufferedImage(), "JPEG", new File(
+                                fileSelector.getSelectedFile().getParent(), "src.jpg"
+                        ));
+                        ImageIO.write(destPanel.getMorphableImage().getBaseBufferedImage(), "JPEG", new File(
+                                fileSelector.getSelectedFile().getParent(), "dest.jpg"
+                        ));
+                    }
+                    catch (IOException ex)
+                    {
+                        System.out.println("Error writing images...");
+                    }
+
+                    String dataName = fileSelector.getSelectedFile().getParent() + "/data.txt";
+                    String srcName = fileSelector.getSelectedFile().getParent() + "/src.jpg";
+                    String destName = fileSelector.getSelectedFile().getParent() + "/dest.jpg";
+
+                    // Take the three created files and put them all into a ZIP directory
+                    File zipFile = new File(fileSelector.getSelectedFile().getAbsolutePath());
+                    try
+                    {
+                        // Create input streams for each file
+                        FileInputStream dataIn = new FileInputStream(dataName);
+                        FileInputStream srcIn = new FileInputStream(srcName);
+                        FileInputStream destIn = new FileInputStream(destName);
+
+                        ZipOutputStream zipStream = new ZipOutputStream(new FileOutputStream(zipFile));
+
+                        ZipEntry dataEntry = new ZipEntry("data.txt");
+                        ZipEntry srcEntry = new ZipEntry("src.jpg");
+                        ZipEntry destEntry = new ZipEntry("dest.jpg");
+
+                        try {
+                            byte[] b;
+                            int count;
+
+                            // Write the data to the ZIP file
+                            zipStream.putNextEntry(dataEntry);
+                            b = new byte[1024];
+
+                            while ((count = dataIn.read(b)) > 0)
+                            {
+                                zipStream.write(b, 0, count);
+                            }
+                            zipStream.closeEntry();
+                            dataIn.close();
+
+                            // Write the source image to the ZIP file
+                            zipStream.putNextEntry(srcEntry);
+                            b = new byte[1024];
+
+                            while ((count = srcIn.read(b)) > 0)
+                            {
+                                zipStream.write(b, 0, count);
+                            }
+                            zipStream.closeEntry();
+                            srcIn.close();
+
+                            // Write the dest image to the ZIP file
+                            zipStream.putNextEntry(destEntry);
+                            b = new byte[1024];
+
+                            while ((count = destIn.read(b)) > 0)
+                            {
+                                zipStream.write(b, 0, count);
+                            }
+                            zipStream.closeEntry();
+                            destIn.close();
+
+                            zipStream.close();
+                        }
+                        catch (IOException ex)
+                        {
+                            System.out.println("Something went horribly wrong: IO Exception");
+                        }
+                        finally
+                        {
+                            // Delete the temporary files
+                            try {
+                                Files.deleteIfExists(Paths.get(dataName));
+                                Files.deleteIfExists(Paths.get(srcName));
+                                Files.deleteIfExists(Paths.get(destName));
+                            }
+                            catch (IOException ex)
+                            {
+                                System.out.println("Something went horribly wrong: IO Exception");
+                            }
+                        }
+                    }
+                    catch (FileNotFoundException ex)
+                    {
+                        System.out.println("Something went horribly wrong: File not found");
                     }
                 }
                 // user did not select anything
