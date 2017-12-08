@@ -22,6 +22,13 @@ public class PreviewGridPanel extends FullGridPanel{
         imgPair = new MorphableImagePair(b1, b2, stage);
         this.sourcePoints = sourcePoints;
         this.destPoints = destPoints;
+
+        // Set all of the points to not editable
+        for (int i = 0; i < gridWidth; i++)
+        {
+            for (int j = 0; j < gridHeight; j++)
+                points[i][j].setEditable(false);
+        }
     }
 
     // Getters/setters
@@ -220,7 +227,7 @@ public class PreviewGridPanel extends FullGridPanel{
 
         // Draw the images on top of each other
         g.setColor(Color.BLACK);
-        g.fillRect(0, 0, pointWidth * gridWidth, pointHeight * gridHeight);
+        g.fillRect(0, 0, pointWidth * (gridWidth + 1), pointHeight * (gridHeight + 1));
         g2d.setComposite(AlphaComposite.SrcOver.derive(1.f - stage));
         g2d.drawImage(imgPair.getBufferedImage(), 0, 0, this);
         g2d.setComposite(AlphaComposite.SrcOver.derive(stage));

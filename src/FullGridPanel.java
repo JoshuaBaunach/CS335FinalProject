@@ -319,6 +319,16 @@ public class FullGridPanel extends JPanel
 
     }
 
+    /*
+    This function applies a new intensity to the morphed image.
+    The only argument is an integer. This integer will be divided by 1000 to get the appropriate new intensity.
+     */
+    public void applyIntensity(int intensity)
+    {
+        image.applyIntensity(intensity);
+        repaint();
+    }
+
     public Dimension getPreferredSize()
     {
         return new Dimension(pointWidth * (gridWidth + 1), pointHeight * (gridHeight + 1));

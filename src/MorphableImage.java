@@ -8,10 +8,12 @@ import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.GeneralPath;
 import java.awt.image.BufferedImage;
+import java.awt.image.ConvolveOp;
+import java.awt.image.Kernel;
 
 public class MorphableImage extends JLabel {
 
-    BufferedImage bim, warpedbim;
+    BufferedImage bim, warpedbim, basebim;
     boolean showWarped;
 
     // Default constructor
@@ -23,7 +25,10 @@ public class MorphableImage extends JLabel {
     // Constructor 1: Morphable image that uses the source image X and Y resolution
     public MorphableImage(String location)
     {
-        bim = readImage(location);
+        //bim = readImage(location);
+        basebim = readImage(location);
+        bim = new BufferedImage(basebim.getWidth(), basebim.getHeight(), BufferedImage.TYPE_INT_RGB);
+        applyIntensity(1000);
         int oldWidth = bim.getWidth();
         int oldHeight = bim.getHeight();
         //bim = readImage(location, oldWidth*8, oldHeight*8);
@@ -35,7 +40,10 @@ public class MorphableImage extends JLabel {
     // Constructor 2: Morphable image that uses a custom X and Y resolution
     public MorphableImage(String location, int xRes, int yRes)
     {
-        bim = readImage(location, xRes, yRes);
+        //bim = readImage(location, xRes, yRes);
+        basebim = readImage(location, xRes, yRes);
+        bim = new BufferedImage(basebim.getWidth(), basebim.getHeight(), BufferedImage.TYPE_INT_RGB);
+        applyIntensity(1000);
         warpedbim = new BufferedImage(xRes, yRes, BufferedImage.TYPE_INT_RGB);
         showWarped = false;
         repaint();
@@ -44,7 +52,10 @@ public class MorphableImage extends JLabel {
     // Constructor 2: Morphable image that uses a Buffered Image that was already created
     public MorphableImage(BufferedImage bim)
     {
-        this.bim = bim;
+        //this.bim = bim;
+        this.basebim = bim;
+        this.bim = new BufferedImage(basebim.getWidth(), basebim.getHeight(), BufferedImage.TYPE_INT_RGB);
+        applyIntensity(1000);
         warpedbim = new BufferedImage(bim.getWidth(), bim.getHeight(), BufferedImage.TYPE_INT_RGB);
         showWarped = false;
         repaint();
@@ -211,6 +222,24 @@ public class MorphableImage extends JLabel {
         warpTriangle(bim, warpedbim, tris8, trid8, null, null);
         showWarped = true;
         repaint();
+    }
+
+    /*
+    This function applies a new intensity to the morphed image.
+    The only argument is an integer. This integer will be divided by 1000 to get the appropriate new intensity.
+     */
+    public void applyIntensity(int intensity)
+    {
+        float[] intensityMatrix = new float[9];
+        intensityMatrix[4] = (float)intensity / 1000.f;
+        Kernel kernel = new Kernel(3, 3, intensityMatrix);
+        ConvolveOp cop = new ConvolveOp(kernel, ConvolveOp.EDGE_NO_OP, null);
+
+        BufferedImage newbim = new BufferedImage(basebim.getWidth(), basebim.getHeight(), BufferedImage.TYPE_INT_RGB);
+        Graphics2D big = newbim.createGraphics();
+        big.drawImage(basebim, 0, 0, null);
+
+        cop.filter(newbim, bim);
     }
 
     public void paintComponent(Graphics g)

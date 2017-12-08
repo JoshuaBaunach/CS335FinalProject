@@ -13,7 +13,7 @@ public class GridPoint extends JPanel
 
     // Private variables
     private int pointWidth, pointHeight, controlX, controlY, locX, locY;
-    private boolean moved, rubberbanding, partnerMoved, pointUpdated;
+    private boolean moved, rubberbanding, partnerMoved, pointUpdated, highlighted, editable;
     private GridPoint partnerPoint; // The point that corresponds to this point on the other panel
     private GridPoint northNeighbor, eastNeighbor, southNeighbor, westNeighbor; // Points that help define the bounding box of this point
     private FullGridPanel parentPanel;
@@ -28,6 +28,8 @@ public class GridPoint extends JPanel
         this.partnerMoved = false;
         this.rubberbanding = false;
         this.pointUpdated = true;
+        this.highlighted = false;
+        editable = true;
         this.locX = 0;
         this.locY = 0;
 
@@ -48,6 +50,8 @@ public class GridPoint extends JPanel
         this.partnerMoved = point.partnerMoved;
         this.rubberbanding = false;
         this.pointUpdated = true;
+        this.highlighted = false;
+        this.editable = point.editable;
         this.locX = point.locX;
         this.locY = point.locY;
         setLocation(locX, locY);
@@ -69,6 +73,7 @@ public class GridPoint extends JPanel
         this.locY = loc.y;
         setLocation(loc);
     }
+    public void setEditable(boolean editable) { this.editable = editable; }
 
     // Setters for the neighbors
     public void setNorthNeighbor(GridPoint neighbor) { this.northNeighbor = neighbor; }
@@ -84,6 +89,7 @@ public class GridPoint extends JPanel
     public boolean getPointUpdated() { return pointUpdated; }
     public boolean getRubberbanding() { return rubberbanding; }
     public Point getPointLocation() { return new Point(locX, locY); }
+    public boolean getEditable() { return this.editable; }
 
     // Getters for the neighbors
     public GridPoint getNorthNeighbor() { return northNeighbor; }
@@ -116,7 +122,14 @@ public class GridPoint extends JPanel
         //g.drawOval(controlX-POINTRADIUS, controlY-POINTRADIUS, POINTRADIUS*2, POINTRADIUS*2);
         g.setColor(Color.BLACK);
         g.drawOval(0, 0, POINTRADIUS*2, POINTRADIUS*2);
-        if (moved || partnerMoved) g.setColor(Color.GREEN);
+        if (highlighted || partnerPoint != null)
+        {
+            if (partnerPoint.highlighted)
+                g.setColor(Color.BLUE);
+            else if (moved || partnerMoved) g.setColor(Color.GREEN);
+            else g.setColor(Color.RED);
+        }
+        else if (moved || partnerMoved) g.setColor(Color.GREEN);
         else g.setColor(Color.RED);
         //g.fillOval(controlX-POINTRADIUS, controlY-POINTRADIUS, POINTRADIUS*2, POINTRADIUS*2);
         g.fillOval(0, 0, POINTRADIUS*2, POINTRADIUS*2);
@@ -132,6 +145,9 @@ public class GridPoint extends JPanel
     // This private class handles the motion for the rubberbanding.
     private class RubberbandMotionListener extends MouseMotionAdapter
     {
+        /*
+        This function will control the rubberbanding of the point.
+         */
         public void mouseDragged(MouseEvent e)
         {
             if (rubberbanding)
@@ -214,9 +230,11 @@ public class GridPoint extends JPanel
             /*double mouseDist = Math.sqrt(Math.pow(e.getX() - controlX, 2) + Math.pow(e.getY() - controlY, 2));
             if (mouseDist <= (float)POINTRADIUS)
             {*/
+            if (editable) {
                 rubberbanding = true;
                 moved = true;
                 partnerPoint.setPartnerMoved(true);
+            }
             //}
         }
 
@@ -224,6 +242,24 @@ public class GridPoint extends JPanel
         {
             rubberbanding = false;
             pointUpdated = false;
+        }
+
+        public void mouseEntered(MouseEvent e)
+        {
+            if (editable) {
+                highlighted = true;
+                repaint();
+                partnerPoint.repaint();
+            }
+        }
+
+        public void mouseExited(MouseEvent e)
+        {
+            if (editable) {
+                highlighted = false;
+                repaint();
+                partnerPoint.repaint();
+            }
         }
     }
 }

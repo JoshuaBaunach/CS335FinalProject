@@ -34,11 +34,12 @@ public class MainFrame extends JFrame
     private PrintWriter writer;
     private int gridWidth, gridHeight, pointSize;
 
-    private JSlider swingSliderFps, swingSliderTime, controlPointXResolutionSlider, controlPointYResolutionSlider;
+    private JSlider swingSliderFps, swingSliderTime, controlPointXResolutionSlider, controlPointYResolutionSlider,
+    srcIntensitySlider, destIntensitySlider;
     private JFrame adjFrame; // frame used for fps and time adjustments
     private JPanel adjPanel;
-    private GridLayout gridLayout;
-    private JLabel fpsLabel, timeLabel, xResLabel, yResLabel;
+    private GridBagLayout gridLayout;
+    private JLabel fpsLabel, timeLabel, xResLabel, yResLabel, srcIntensityLabel, destIntensityLabel, totalFramesLabel;
     private int fps, aniTime;
     private int frameCount;
     private String srcDirectory, destDirectory;
@@ -68,8 +69,8 @@ public class MainFrame extends JFrame
         destDirectory = DEFAULTDEST;
 
         initMenu();
-        initFrame();
         initSliders();
+        initFrame();
 
         add(mainPanel, BorderLayout.SOUTH);
         pack();
@@ -108,13 +109,32 @@ public class MainFrame extends JFrame
         sourcePanel.setPartnerPanel(destPanel);
         destPanel.setPartnerPanel(sourcePanel);
 
+        constraints.weightx = 1;
+        constraints.weighty = 1;
+
         constraints.gridx = 0;
         constraints.gridy = 0;
-        mainPanel.add(sourcePanel);
+        mainPanel.add(sourcePanel, constraints);
 
         constraints.gridx = 1;
         constraints.gridy = 0;
-        mainPanel.add(destPanel);
+        mainPanel.add(destPanel, constraints);
+
+        constraints.gridx = 0;
+        constraints.gridy = 1;
+        mainPanel.add(srcIntensitySlider, constraints);
+
+        constraints.gridx = 0;
+        constraints.gridy = 2;
+        mainPanel.add(srcIntensityLabel, constraints);
+
+        constraints.gridx = 1;
+        constraints.gridy = 1;
+        mainPanel.add(destIntensitySlider, constraints);
+
+        constraints.gridx = 1;
+        constraints.gridy = 2;
+        mainPanel.add(destIntensityLabel, constraints);
 
     }
 
@@ -125,10 +145,33 @@ public class MainFrame extends JFrame
         // Slider init:
 
         // setting labels
-        fpsLabel = new JLabel("FPS: 60");
-        timeLabel = new JLabel("Time: 1 second(s)");
+        fpsLabel = new JLabel("FPS: 30");
+        timeLabel = new JLabel("Time: 3 second(s)");
+        totalFramesLabel = new JLabel("Total Frames: 90");
         xResLabel = new JLabel("X Resolution: 10");
         yResLabel = new JLabel("Y Resolution: 10");
+        srcIntensityLabel = new JLabel("Adjust Source Intensity");
+        destIntensityLabel = new JLabel("Adjust Destination Intensity");
+
+        // Intensity slider init
+        srcIntensitySlider = new JSlider(JSlider.HORIZONTAL, 1, 2000, 1000);
+        srcIntensitySlider.setPaintTicks(false);
+        srcIntensitySlider.addChangeListener(new ChangeListener() {
+            @Override
+            public void stateChanged(ChangeEvent e) {
+                sourcePanel.applyIntensity(srcIntensitySlider.getValue());
+            }
+        });
+
+        // Intensity slider init
+        destIntensitySlider = new JSlider(JSlider.HORIZONTAL, 1, 2000, 1000);
+        destIntensitySlider.setPaintTicks(false);
+        destIntensitySlider.addChangeListener(new ChangeListener() {
+            @Override
+            public void stateChanged(ChangeEvent e) {
+                destPanel.applyIntensity(destIntensitySlider.getValue());
+            }
+        });
 
         //fps slider init
         swingSliderFps = new JSlider(JSlider.HORIZONTAL, 1, 60, 30);
@@ -136,6 +179,14 @@ public class MainFrame extends JFrame
         swingSliderFps.setPaintLabels(true);
         swingSliderFps.setPaintTicks(true);
         swingSliderFps.setPreferredSize(new Dimension(200,30));
+        swingSliderFps.addChangeListener(new ChangeListener() {
+            @Override
+            public void stateChanged(ChangeEvent e) {
+                fps = swingSliderFps.getValue();
+                totalFramesLabel.setText("Total Frames: " + Integer.toString(fps * aniTime));
+            }
+        });
+        fps = 30;
 
         // time slider init
         swingSliderTime = new JSlider(JSlider.HORIZONTAL, 1, 5, 3);
@@ -143,6 +194,14 @@ public class MainFrame extends JFrame
         swingSliderTime.setPaintLabels(true);
         swingSliderTime.setPaintTicks(true);
         swingSliderTime.setPreferredSize(new Dimension(200,30));
+        swingSliderTime.addChangeListener(new ChangeListener() {
+            @Override
+            public void stateChanged(ChangeEvent e) {
+                aniTime = swingSliderTime.getValue();
+                totalFramesLabel.setText("Total Frames: " + Integer.toString(fps * aniTime));
+            }
+        });
+        aniTime = 3;
 
         // Control Point X Resolution Slider
         controlPointXResolutionSlider = new JSlider(JSlider.HORIZONTAL, 5, 25, 10);
@@ -302,6 +361,17 @@ public class MainFrame extends JFrame
                         }
                         destPanel.setPoints(newDestPoints);
 
+                        // Set the FPS and animation time
+                        buffReader.readLine();
+                        line = buffReader.readLine();
+                        token = new StringTokenizer(line);
+                        fps = Integer.parseInt(token.nextToken());
+                        line = buffReader.readLine();
+                        token = new StringTokenizer(line);
+                        aniTime = Integer.parseInt(token.nextToken());
+                        swingSliderFps.setValue(fps);
+                        swingSliderTime.setValue(aniTime);
+
                     }
                     catch(FileNotFoundException e2) {
                         e2.printStackTrace();
@@ -323,10 +393,11 @@ public class MainFrame extends JFrame
             public void actionPerformed(ActionEvent e) {
                 // save the data to a file
                 fileSelector = new JFileChooser();
-                fileSelector.setCurrentDirectory(new java.io.File("."));
-                fileSelector.setDialogTitle("Select which DIRECTORY you want to store the save file");
+                fileSelector.setCurrentDirectory(new java.io.File("./"));
+                fileSelector.setSelectedFile(new File("savefile.txt"));
+                fileSelector.setDialogTitle("Save Control Point Information");
                 // only allowing the user to choose directories
-                fileSelector.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+                fileSelector.setApproveButtonText("Save");
                 fileSelector.setAcceptAllFileFilterUsed(false);
                 if (fileSelector.showOpenDialog(mainPanel) == JFileChooser.APPROVE_OPTION)
                 {
@@ -334,7 +405,7 @@ public class MainFrame extends JFrame
                     System.out.println("getSelectedFile() : "
                             +  fileSelector.getSelectedFile()); // selected "file" actually grabs the directory the user selected
                     try {
-                        writer = new PrintWriter(fileSelector.getSelectedFile() + "\\savedData.txt", "UTF-8");
+                        writer = new PrintWriter(fileSelector.getSelectedFile(), "UTF-8");
                         GridPoint[][] srcGridPoints = sourcePanel.getPoints();
                         GridPoint[][] destGridPoints = destPanel.getPoints();
 
@@ -460,17 +531,51 @@ public class MainFrame extends JFrame
                 adjPanel = new JPanel();
 
                 //setting layout on the adjPanel
-                gridLayout = new GridLayout(0,2);
+                gridLayout = new GridBagLayout();
+                GridBagConstraints c = new GridBagConstraints();
                 adjPanel.setLayout(gridLayout);
 
                 // adding labels overtop the sliders
-                adjPanel.add(fpsLabel);
-                adjPanel.add(timeLabel);
+                c.gridx = 0;
+                c.gridy = 1;
+                adjPanel.add(fpsLabel, c);
+                c.gridx = 1;
+                c.gridy = 1;
+                adjPanel.add(timeLabel, c);
 
                 //adding the sliders to the frame/panel
-                adjPanel.add(swingSliderFps);
-                adjPanel.add(swingSliderTime);
+                c.gridx = 0;
+                c.gridy = 0;
+                adjPanel.add(swingSliderFps, c);
+                c.gridx = 1;
+                c.gridy = 0;
+                adjPanel.add(swingSliderTime, c);
+
+                // Add the label containing the current frame total
+                c.gridx = 0;
+                c.gridy = 2;
+                c.gridwidth = 2;
+                adjPanel.add(totalFramesLabel, c);
+
+                // Add a disclaimer concerning timing
+                JLabel disclaimer = new JLabel("Disclaimer: Animation preview may not match your settings," +
+                        " depending on the strength of your system.");
+                c.gridwidth = 2;
+                c.gridx = 0;
+                c.gridy = 3;
+                adjPanel.add(disclaimer, c);
                 adjFrame.getContentPane().add(adjPanel);
+
+                // Add a button that will apply the changes
+                c.gridy = 4;
+                JButton applyChanges = new JButton("Apply");
+                applyChanges.addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        adjFrame.dispatchEvent(new WindowEvent(adjFrame, WindowEvent.WINDOW_CLOSING));
+                    }
+                });
+                adjPanel.add(applyChanges, c);
 
                 //adjFrame.setSize(745, 470);
                 adjFrame.pack();
@@ -502,21 +607,28 @@ public class MainFrame extends JFrame
                 adjPanel = new JPanel();
 
                 //setting layout on the adjPanel
-                gridLayout = new GridLayout(0,2);
+                gridLayout = new GridBagLayout();
+                GridBagConstraints c = new GridBagConstraints();
                 adjPanel.setLayout(gridLayout);
 
                 // adding labels overtop the sliders
-                adjPanel.add(xResLabel);
-                adjPanel.add(yResLabel);
+                c.gridx = 0;
+                c.gridy = 1;
+                adjPanel.add(xResLabel, c);
+                c.gridx = 1;
+                c.gridy = 1;
+                adjPanel.add(yResLabel, c);
 
                 //adding the sliders to the frame/panel
-                adjPanel.add(controlPointXResolutionSlider);
-                adjPanel.add(controlPointYResolutionSlider);
+                c.gridx = 0;
+                c.gridy = 0;
+                adjPanel.add(controlPointXResolutionSlider, c);
+                c.gridx = 1;
+                c.gridy = 0;
+                adjPanel.add(controlPointYResolutionSlider, c);
                 adjFrame.getContentPane().add(adjPanel);
 
                 //adjFrame.setSize(745, 470);
-                adjFrame.pack();
-                adjFrame.setVisible(true);
 
                 controlPointXResolutionSlider.addChangeListener(new ChangeListener() {
                     public void stateChanged(ChangeEvent e) {
@@ -530,6 +642,9 @@ public class MainFrame extends JFrame
                     }
                 });
 
+                c.gridx = 0;
+                c.gridy = 2;
+                c.gridwidth = 2;
                 // Add a button that will apply the changes
                 JButton applyChanges = new JButton("Apply");
                 applyChanges.addActionListener(new ActionListener() {
@@ -541,7 +656,9 @@ public class MainFrame extends JFrame
                         adjFrame.dispatchEvent(new WindowEvent(adjFrame, WindowEvent.WINDOW_CLOSING));
                     }
                 });
-                adjFrame.add(applyChanges);
+                adjPanel.add(applyChanges, c);
+                adjFrame.pack();
+                adjFrame.setVisible(true);
             }
         });
 
