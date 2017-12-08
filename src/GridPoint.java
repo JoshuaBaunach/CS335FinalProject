@@ -124,7 +124,7 @@ public class GridPoint extends JPanel
         g.drawOval(0, 0, POINTRADIUS*2, POINTRADIUS*2);
         if (highlighted || partnerPoint != null)
         {
-            if (partnerPoint.highlighted)
+            if (partnerPoint.highlighted || highlighted)
                 g.setColor(Color.BLUE);
             else if (moved || partnerMoved) g.setColor(Color.GREEN);
             else g.setColor(Color.RED);

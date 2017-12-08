@@ -15,6 +15,7 @@ public class MorphableImage extends JLabel {
 
     BufferedImage bim, warpedbim, basebim;
     boolean showWarped;
+    int intensity;
 
     // Default constructor
     public MorphableImage()
@@ -29,6 +30,7 @@ public class MorphableImage extends JLabel {
         basebim = readImage(location);
         bim = new BufferedImage(basebim.getWidth(), basebim.getHeight(), BufferedImage.TYPE_INT_RGB);
         applyIntensity(1000);
+        intensity = 1000;
         int oldWidth = bim.getWidth();
         int oldHeight = bim.getHeight();
         //bim = readImage(location, oldWidth*8, oldHeight*8);
@@ -44,6 +46,7 @@ public class MorphableImage extends JLabel {
         basebim = readImage(location, xRes, yRes);
         bim = new BufferedImage(basebim.getWidth(), basebim.getHeight(), BufferedImage.TYPE_INT_RGB);
         applyIntensity(1000);
+        intensity = 1000;
         warpedbim = new BufferedImage(xRes, yRes, BufferedImage.TYPE_INT_RGB);
         showWarped = false;
         repaint();
@@ -56,6 +59,7 @@ public class MorphableImage extends JLabel {
         this.basebim = bim;
         this.bim = new BufferedImage(basebim.getWidth(), basebim.getHeight(), BufferedImage.TYPE_INT_RGB);
         applyIntensity(1000);
+        intensity = 1000;
         warpedbim = new BufferedImage(bim.getWidth(), bim.getHeight(), BufferedImage.TYPE_INT_RGB);
         showWarped = false;
         repaint();
@@ -66,6 +70,7 @@ public class MorphableImage extends JLabel {
     public BufferedImage getBufferedImage() { return showWarped ? warpedbim : bim; }
     public int getBimWidth() { return bim.getWidth(); }
     public int getBimHeight() { return bim.getHeight(); }
+    public int getIntensity() { return intensity; }
 
     public void setBufferedImage(BufferedImage bim) { this.bim = bim;}
 
@@ -241,6 +246,8 @@ public class MorphableImage extends JLabel {
         big.drawImage(basebim, 0, 0, null);
 
         cop.filter(newbim, bim);
+
+        this.intensity = intensity;
     }
 
     public void paintComponent(Graphics g)

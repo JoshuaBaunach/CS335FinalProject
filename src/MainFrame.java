@@ -427,6 +427,18 @@ public class MainFrame extends JFrame
                         swingSliderFps.setValue(fps);
                         swingSliderTime.setValue(aniTime);
 
+                        // Set the intensities
+                        line = buffReader.readLine();
+                        token = new StringTokenizer(line);
+                        srcIntensitySlider.setValue(Integer.parseInt(token.nextToken()));
+                        sourcePanel.applyIntensity(srcIntensitySlider.getValue());
+                        line = buffReader.readLine();
+                        token = new StringTokenizer(line);
+                        destIntensitySlider.setValue(Integer.parseInt(token.nextToken()));
+                        destPanel.applyIntensity(destIntensitySlider.getValue());
+
+                        buffReader.close();
+
 
                     }
                     catch(FileNotFoundException e2) {
@@ -434,9 +446,22 @@ public class MainFrame extends JFrame
 
                     }catch(IOException e2) {
                         e2.printStackTrace();
-                    } finally
+                    }
+                    finally
                     {
-
+                        // Delete the temporary files
+                        try {
+                            String dataName = fileSelector.getSelectedFile().getParent() + "\\data.txt";
+                            String srcName = fileSelector.getSelectedFile().getParent() + "\\src.jpg";
+                            String destName = fileSelector.getSelectedFile().getParent() + "\\dest.jpg";
+                            Files.deleteIfExists(Paths.get(dataName));
+                            Files.deleteIfExists(Paths.get(srcName));
+                            Files.deleteIfExists(Paths.get(destName));
+                        }
+                        catch (IOException ex)
+                        {
+                            System.out.println("Something went horribly wrong: IO Exception");
+                        }
                     }
                 }
                 // user did not select anything
@@ -488,9 +513,15 @@ public class MainFrame extends JFrame
                             }
                         }
 
+                        // Save the fps and animation time
                         writer.println("MARKER"); // denote the end of the control points
                         writer.println(fps);
                         writer.println(aniTime);
+
+                        // Save the intensity levels of the source and destination images
+                        writer.println(sourcePanel.getMorphableImage().getIntensity());
+                        writer.println(destPanel.getMorphableImage().getIntensity());
+
                         writer.close();
                     }
                     catch(FileNotFoundException e2) {
@@ -522,9 +553,9 @@ public class MainFrame extends JFrame
                         System.out.println("Error writing images...");
                     }
 
-                    String dataName = fileSelector.getSelectedFile().getParent() + "/data.txt";
-                    String srcName = fileSelector.getSelectedFile().getParent() + "/src.jpg";
-                    String destName = fileSelector.getSelectedFile().getParent() + "/dest.jpg";
+                    String dataName = fileSelector.getSelectedFile().getParent() + "\\data.txt";
+                    String srcName = fileSelector.getSelectedFile().getParent() + "\\src.jpg";
+                    String destName = fileSelector.getSelectedFile().getParent() + "\\dest.jpg";
 
                     // Take the three created files and put them all into a ZIP directory
                     File zipFile = new File(fileSelector.getSelectedFile().getAbsolutePath());
