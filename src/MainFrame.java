@@ -177,6 +177,7 @@ public class MainFrame extends JFrame
             public void actionPerformed(ActionEvent e) {
                 fileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
                 fileChooser.setMultiSelectionEnabled(false);
+                fileChooser.setCurrentDirectory(new java.io.File("."));
                 fileChooser.setDialogTitle("Import Source Image");
                 int dialogVal = fileChooser.showOpenDialog(getContentPane());
 
@@ -196,6 +197,7 @@ public class MainFrame extends JFrame
             public void actionPerformed(ActionEvent e) {
                 fileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
                 fileChooser.setMultiSelectionEnabled(false);
+                fileChooser.setCurrentDirectory(new java.io.File("."));
                 fileChooser.setDialogTitle("Import Destination Image");
                 int dialogVal = fileChooser.showOpenDialog(getContentPane());
 

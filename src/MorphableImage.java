@@ -181,15 +181,34 @@ public class MorphableImage extends JLabel {
     /*
     This function morphs using four different triangles.
      */
-    public void warpBim(Point vs1, Point vs2, Point vs3, Point vs4, Point vd1, Point vd2, Point vd3, Point vd4)
+    public void warpBim(Point vs1, Point vs2, Point vs3, Point vs4, Point vs5, Point vs6, Point vs7, Point vs8, Point vs9,
+                        Point vd1, Point vd2, Point vd3, Point vd4, Point vd5, Point vd6, Point vd7, Point vd8, Point vd9)
     {
-        Triangle tris1 = new Triangle(vs1, vs3, vs4);
-        Triangle tris2 = new Triangle(vs2, vs1, vs3);
-        Triangle trid1 = new Triangle(vd1, vd3, vd4);
-        Triangle trid2 = new Triangle(vd2, vd1, vd3);
+        Triangle tris1 = new Triangle(vs1, vs2, vs5);
+        Triangle tris2 = new Triangle(vs1, vs4, vs5);
+        Triangle tris3 = new Triangle(vs2, vs6, vs5);
+        Triangle tris4 = new Triangle(vs2, vs3, vs6);
+        Triangle tris5 = new Triangle(vs4, vs8, vs5);
+        Triangle tris6 = new Triangle(vs4, vs7, vs8);
+        Triangle tris7 = new Triangle(vs5, vs6, vs9);
+        Triangle tris8 = new Triangle(vs5, vs8, vs9);
+        Triangle trid1 = new Triangle(vd1, vd2, vd5);
+        Triangle trid2 = new Triangle(vd1, vd4, vd5);
+        Triangle trid3 = new Triangle(vd2, vd6, vd5);
+        Triangle trid4 = new Triangle(vd2, vd3, vd6);
+        Triangle trid5 = new Triangle(vd4, vd8, vd5);
+        Triangle trid6 = new Triangle(vd4, vd7, vd8);
+        Triangle trid7 = new Triangle(vd5, vd6, vd9);
+        Triangle trid8 = new Triangle(vd5, vd8, vd9);
 
         warpTriangle(bim, warpedbim, tris1, trid1, null, null);
         warpTriangle(bim, warpedbim, tris2, trid2, null, null);
+        warpTriangle(bim, warpedbim, tris3, trid3, null, null);
+        warpTriangle(bim, warpedbim, tris4, trid4, null, null);
+        warpTriangle(bim, warpedbim, tris5, trid5, null, null);
+        warpTriangle(bim, warpedbim, tris6, trid6, null, null);
+        warpTriangle(bim, warpedbim, tris7, trid7, null, null);
+        warpTriangle(bim, warpedbim, tris8, trid8, null, null);
         showWarped = true;
         repaint();
     }

@@ -46,8 +46,8 @@ public class FullGridPanel extends JPanel
             this.width = image.getBimWidth();
             this.height = image.getBimHeight();
         }
-        pointWidth = width / gridWidth;
-        pointHeight = height / gridHeight;
+        pointWidth = width / (gridWidth + 1);
+        pointHeight = height / (gridHeight + 1);
 
         setLayout(null);
 
@@ -74,7 +74,8 @@ public class FullGridPanel extends JPanel
                 //add(points[i][j], c);
                 add(points[i][j]);
                 points[i][j].setSize(new Dimension(GridPoint.POINTRADIUS*2, GridPoint.POINTRADIUS*2));
-                points[i][j].setPointLocation(new Point((pointWidth * i) + (pointWidth / 2) - GridPoint.POINTRADIUS, (pointHeight * j) + (pointHeight / 2) - GridPoint.POINTRADIUS));
+                //points[i][j].setPointLocation(new Point((pointWidth * (i)) + (pointWidth / 2) - GridPoint.POINTRADIUS, (pointHeight * (j)) + (pointHeight / 2) - GridPoint.POINTRADIUS));
+                points[i][j].setPointLocation(new Point((pointWidth * (i + 1)) - GridPoint.POINTRADIUS, (pointHeight * (j+1)) - GridPoint.POINTRADIUS));
                 points[i][j].setParentPanel(this);
             }
         }
@@ -99,8 +100,8 @@ public class FullGridPanel extends JPanel
             this.width = image.getBimWidth();
             this.height = image.getBimHeight();
         }
-        pointWidth = width / gridWidth;
-        pointHeight = height / gridHeight;
+        pointWidth = width / (gridWidth + 1);
+        pointHeight = height / (gridHeight + 1);
 
         setLayout(null);
 
@@ -123,7 +124,8 @@ public class FullGridPanel extends JPanel
                 //add(points[i][j], c);
                 add(points[i][j]);
                 points[i][j].setSize(new Dimension(GridPoint.POINTRADIUS * 2, GridPoint.POINTRADIUS * 2));
-                points[i][j].setPointLocation(new Point((pointWidth * i) + (pointWidth / 2) - GridPoint.POINTRADIUS, (pointHeight * j) + (pointHeight / 2) - GridPoint.POINTRADIUS));
+                //points[i][j].setPointLocation(new Point((pointWidth * (i)) + (pointWidth / 2) - GridPoint.POINTRADIUS, (pointHeight * (j)) + (pointHeight / 2) - GridPoint.POINTRADIUS));
+                points[i][j].setPointLocation(new Point((pointWidth * (i + 1)) - GridPoint.POINTRADIUS, (pointHeight * (j+1)) - GridPoint.POINTRADIUS));
                 points[i][j].setParentPanel(this);
             }
         }
@@ -144,8 +146,8 @@ public class FullGridPanel extends JPanel
         this.height = image.getBimHeight();
         this.mousePoint = new Point();
 
-        pointWidth = width / gridWidth;
-        pointHeight = height / gridHeight;
+        pointWidth = width / (gridWidth + 1);
+        pointHeight = height / (gridHeight + 1);
 
         setLayout(null);
 
@@ -168,7 +170,8 @@ public class FullGridPanel extends JPanel
                 //add(points[i][j], c);
                 add(points[i][j]);
                 points[i][j].setSize(new Dimension(GridPoint.POINTRADIUS * 2, GridPoint.POINTRADIUS * 2));
-                points[i][j].setPointLocation(new Point((pointWidth * i) + (pointWidth / 2) - GridPoint.POINTRADIUS, (pointHeight * j) + (pointHeight / 2) - GridPoint.POINTRADIUS));
+                //points[i][j].setPointLocation(new Point((pointWidth * (i)) + (pointWidth / 2) - GridPoint.POINTRADIUS, (pointHeight * (j)) + (pointHeight / 2) - GridPoint.POINTRADIUS));
+                points[i][j].setPointLocation(new Point((pointWidth * (i + 1)) - GridPoint.POINTRADIUS, (pointHeight * (j+1)) - GridPoint.POINTRADIUS));
                 points[i][j].setParentPanel(this);
             }
         }
@@ -234,7 +237,7 @@ public class FullGridPanel extends JPanel
         if (image == null)
         {
             g.setColor(Color.BLACK);
-            g.fillRect(0, 0, pointWidth * gridWidth, pointHeight * gridHeight);
+            g.fillRect(0, 0, pointWidth * (gridWidth + 1), pointHeight * (gridHeight + 1));
         }
         else
         {
@@ -245,7 +248,7 @@ public class FullGridPanel extends JPanel
         g2d.setColor(Color.WHITE);
         Stroke oldStroke = g2d.getStroke();
         g2d.setStroke(new BasicStroke(5));
-        g2d.drawRect(0, 0, pointWidth * gridWidth, pointHeight * gridHeight);
+        //g2d.drawRect(0, 0, pointWidth * gridWidth, pointHeight * gridHeight);
         g2d.setStroke(oldStroke);
 
         // Draw lines between each of the neighbor points
@@ -286,7 +289,31 @@ public class FullGridPanel extends JPanel
                         g.setColor(Color.WHITE);
                     g.drawLine(points[i][j].getLocation().x + GridPoint.POINTRADIUS, points[i][j].getLocation().y + GridPoint.POINTRADIUS,
                             points[i][j].getSouthNeighbor().getLocation().x + GridPoint.POINTRADIUS, points[i][j].getSouthNeighbor().getLocation().y + GridPoint.POINTRADIUS);
+                    /*if (points[i][j].getSouthNeighbor().getWestNeighbor() != null)
+                    {
+                        // Draw blue if this point's southwest neighbor is being dragged
+                        if (points[i][j].getSouthNeighbor().getWestNeighbor().getRubberbanding())
+                            g.setColor(Color.BLUE);
+                        else if (!points[i][j].getRubberbanding())
+                            g.setColor(Color.WHITE);
+                        g.drawLine(points[i][j].getLocation().x + GridPoint.POINTRADIUS, points[i][j].getLocation().y + GridPoint.POINTRADIUS,
+                                points[i][j].getSouthNeighbor().getWestNeighbor().getLocation().x + GridPoint.POINTRADIUS, points[i][j].getSouthNeighbor().getWestNeighbor().getLocation().y + GridPoint.POINTRADIUS);
+                    }*/
                 }
+
+                // Draw lines from the edge points, if necessary
+                if (points[i][j].getNorthNeighbor() == null)
+                    g.drawLine(points[i][j].getLocation().x + GridPoint.POINTRADIUS, points[i][j].getLocation().y + GridPoint.POINTRADIUS,
+                            ((i) * pointWidth) - GridPoint.POINTRADIUS, 0);
+                if (points[i][j].getEastNeighbor() == null)
+                    g.drawLine(points[i][j].getLocation().x + GridPoint.POINTRADIUS, points[i][j].getLocation().y + GridPoint.POINTRADIUS,
+                            getPanelWidth(),((j + 2) * pointHeight) + GridPoint.POINTRADIUS);
+                if (points[i][j].getSouthNeighbor() == null)
+                    g.drawLine(points[i][j].getLocation().x + GridPoint.POINTRADIUS, points[i][j].getLocation().y + GridPoint.POINTRADIUS,
+                            ((i + 2) * pointWidth) + GridPoint.POINTRADIUS, getPanelHeight());
+                if (points[i][j].getWestNeighbor() == null)
+                    g.drawLine(points[i][j].getLocation().x + GridPoint.POINTRADIUS, points[i][j].getLocation().y + GridPoint.POINTRADIUS,
+                            0, (j * pointHeight) + GridPoint.POINTRADIUS);
             }
         }
 
@@ -294,6 +321,6 @@ public class FullGridPanel extends JPanel
 
     public Dimension getPreferredSize()
     {
-        return new Dimension(pointWidth * gridWidth, pointHeight * gridHeight);
+        return new Dimension(pointWidth * (gridWidth + 1), pointHeight * (gridHeight + 1));
     }
 }

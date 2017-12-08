@@ -145,47 +145,53 @@ public class GridPoint extends JPanel
                     if (northNeighbor.westNeighbor != null)
                         boundPoly.addPoint(northNeighbor.westNeighbor.getLocation().x, northNeighbor.westNeighbor.getLocation().y);
                     else
-                        boundPoly.addPoint(0,0);
+                        boundPoly.addPoint(0,northNeighbor.getLocation().y - pointHeight);
                     boundPoly.addPoint(northNeighbor.getLocation().x, northNeighbor.getLocation().y);
                 }
                 else
                 {
                     if (westNeighbor != null)
-                        boundPoly.addPoint(westNeighbor.getLocation().x, 0);
+                        boundPoly.addPoint(westNeighbor.getLocation().x - pointWidth, 0);
                     else
                         boundPoly.addPoint(0,0);
+                    if (eastNeighbor != null)
+                        boundPoly.addPoint(eastNeighbor.getLocation().x - pointWidth, 0);
                 }
                 if (eastNeighbor != null)
                     boundPoly.addPoint(eastNeighbor.getLocation().x, eastNeighbor.getLocation().y);
                 else
                 {
                     if (northNeighbor != null)
-                        boundPoly.addPoint(parentPanel.getWidth(), northNeighbor.getLocation().y);
+                        boundPoly.addPoint(parentPanel.getWidth(), northNeighbor.getLocation().y + pointHeight);
                     if (southNeighbor != null)
-                        boundPoly.addPoint(parentPanel.getWidth(), southNeighbor.getLocation().y);
+                        boundPoly.addPoint(parentPanel.getWidth(), southNeighbor.getLocation().y + pointHeight);
                 }
                 if (southNeighbor != null) {
                     if (southNeighbor.eastNeighbor != null)
                         boundPoly.addPoint(southNeighbor.eastNeighbor.getLocation().x, southNeighbor.eastNeighbor.getLocation().y);
                     else
-                        boundPoly.addPoint(parentPanel.getPanelWidth(), parentPanel.getPanelHeight());
+                        boundPoly.addPoint(parentPanel.getPanelWidth(), southNeighbor.getLocation().y + pointHeight);
                     boundPoly.addPoint(southNeighbor.getLocation().x, southNeighbor.getLocation().y);
                 }
                 else
                 {
                     if (eastNeighbor != null)
-                        boundPoly.addPoint(eastNeighbor.getLocation().x, parentPanel.getHeight());
+                        boundPoly.addPoint(eastNeighbor.getLocation().x + pointWidth, parentPanel.getHeight());
                     else
                         boundPoly.addPoint(parentPanel.getWidth(), parentPanel.getHeight());
+                    if (westNeighbor != null)
+                        boundPoly.addPoint(westNeighbor.getLocation().x + pointWidth, parentPanel.getHeight());
+                    else
+                        boundPoly.addPoint(0, parentPanel.getHeight());
                 }
                 if (westNeighbor != null)
                     boundPoly.addPoint(westNeighbor.getLocation().x, westNeighbor.getLocation().y);
                 else
                 {
                     if (southNeighbor != null)
-                        boundPoly.addPoint(0, southNeighbor.getLocation().y);
+                        boundPoly.addPoint(0, southNeighbor.getLocation().y - pointHeight);
                     if (northNeighbor != null)
-                        boundPoly.addPoint(0, northNeighbor.getLocation().y);
+                        boundPoly.addPoint(0, northNeighbor.getLocation().y - pointHeight);
                 }
 
                 if (boundPoly.contains(parentPanel.getMousePoint())) {
