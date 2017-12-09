@@ -35,7 +35,7 @@ public class MainFrame extends JFrame
     private JMenu fileMenu, animationMenu; // Menus that will appear at the top of the menu bar
     private JMenu exportSubmenu; // Submenus
     private JMenuItem newItem, openItem, openSrcItem, openDestItem, saveItem, exitItem, previewItem, adjItem, resolutionItem,
-    exportJPEGItem;
+    exportJPEGItem, exportMP4Item;
 
     private JFileChooser fileChooser, fileSelector;
     private BufferedReader buffReader;
@@ -238,6 +238,17 @@ public class MainFrame extends JFrame
         menuBar.add(fileMenu);
 
         newItem = new JMenuItem("New");
+        newItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                gridWidth = 10;
+                gridHeight = 10;
+                srcDirectory = DEFAULTSRC;
+                destDirectory = DEFAULTDEST;
+                resetFrame();
+
+            }
+        });
         openSrcItem = new JMenuItem("Import Source Image");
         openSrcItem.addActionListener(new ActionListener() {
             @Override
@@ -279,7 +290,7 @@ public class MainFrame extends JFrame
             }
         });
 
-        openItem = new JMenuItem("Open");
+        openItem = new JMenuItem("Open Morph File");
         openItem.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 // Allow user to select ONLY TXT files and pull data from them
@@ -359,7 +370,6 @@ public class MainFrame extends JFrame
                         destDirectory = fileSelector.getSelectedFile().getParent() + "/dest.jpg";
                         resetFrame();
 
-                        resetFrame();
                         Point[][] newSourcePoints = new Point[numX][numY];
                         Point[][] newDestPoints = new Point[numX][numY];
                         boolean[][] movedPoints = new boolean[numX][numY];
@@ -469,7 +479,8 @@ public class MainFrame extends JFrame
                     System.out.println("User did not select anything");
                 }
             }});
-        saveItem = new JMenuItem("Save");
+
+        saveItem = new JMenuItem("Save Morph File");
         saveItem.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 // save the data to a file
@@ -558,7 +569,10 @@ public class MainFrame extends JFrame
                     String destName = fileSelector.getSelectedFile().getParent() + "\\dest.jpg";
 
                     // Take the three created files and put them all into a ZIP directory
-                    File zipFile = new File(fileSelector.getSelectedFile().getAbsolutePath());
+                    String finalFilename = fileSelector.getSelectedFile().getAbsolutePath();
+                    if (!FilenameUtils.getExtension(finalFilename).equals("mph"))
+                        finalFilename = finalFilename + ".mph";
+                    File zipFile = new File(finalFilename);
                     try
                     {
                         // Create input streams for each file
@@ -662,7 +676,7 @@ public class MainFrame extends JFrame
                 if (dialogVal == JFileChooser.APPROVE_OPTION)
                 {
                     File f = fileChooser.getSelectedFile();
-                    ExportMorphFrame emf = new ExportMorphFrame(f.getAbsolutePath());
+                    ExportMorphFrame emf = new ExportMorphFrame(f.getAbsolutePath(), false, getMe());
                     Vector<TweenDataPoint> tweens = new Vector();
                     for (int i = 0; i < gridWidth; i++)
                     {
@@ -680,7 +694,40 @@ public class MainFrame extends JFrame
                     emf.init(fps, frameCount, gridWidth, gridHeight, sourcePanel.getMorphableImage().getBufferedImage(),
                             destPanel.getMorphableImage().getBufferedImage(), sourcePanel.getPoints(), destPanel.getPoints());
                     emf.renderFrames();
-                    emf.dispatchEvent(new WindowEvent(emf, WindowEvent.WINDOW_CLOSING));
+                }
+            }
+        });
+        exportMP4Item = new JMenuItem("MP4 Movie");
+        exportMP4Item.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+                fileChooser.setMultiSelectionEnabled(false);
+                fileChooser.setDialogTitle("Choose Export Directory");
+                fileChooser.setApproveButtonText("Export");
+                int dialogVal = fileChooser.showOpenDialog(getContentPane());
+
+                if (dialogVal == JFileChooser.APPROVE_OPTION)
+                {
+                    File f = fileChooser.getSelectedFile();
+                    ExportMorphFrame emf = new ExportMorphFrame(f.getAbsolutePath(), true, getMe());
+                    Vector<TweenDataPoint> tweens = new Vector();
+                    for (int i = 0; i < gridWidth; i++)
+                    {
+                        for (int j = 0; j < gridHeight; j++)
+                        {
+                            //if (sourcePanel.getPoint(i, j).getMoved() || destPanel.getPoint(i, j).getMoved())
+                            tweens.add(new TweenDataPoint(sourcePanel.getPoint(i, j), destPanel.getPoint(i, j), i, j));
+                        }
+                    }
+                    emf.setTweens(tweens);
+                    // default: 60 fps and a framecount of 60 - represents 60 fps at a total animation time of 1 second
+                    fps = swingSliderFps.getValue();
+                    aniTime = swingSliderTime.getValue();
+                    frameCount = fps * aniTime;
+                    emf.init(fps, frameCount, gridWidth, gridHeight, sourcePanel.getMorphableImage().getBufferedImage(),
+                            destPanel.getMorphableImage().getBufferedImage(), sourcePanel.getPoints(), destPanel.getPoints());
+                    emf.renderFrames();
                 }
             }
         });
@@ -697,6 +744,7 @@ public class MainFrame extends JFrame
 
         fileMenu.add(exportSubmenu);
         exportSubmenu.add(exportJPEGItem);
+        exportSubmenu.add(exportMP4Item);
         fileMenu.addSeparator();
         fileMenu.add(exitItem);
 
@@ -880,4 +928,6 @@ public class MainFrame extends JFrame
 
         add(menuBar, BorderLayout.NORTH);
     }
+
+    private MainFrame getMe() { return this; }
 }

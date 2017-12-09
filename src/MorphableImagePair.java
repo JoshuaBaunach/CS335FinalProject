@@ -7,16 +7,22 @@ import java.awt.event.*;
 import java.awt.*;
 import javax.swing.*;
 import java.awt.image.BufferedImage;
+import java.awt.image.ConvolveOp;
+import java.awt.image.Kernel;
 
 public class MorphableImagePair extends MorphableImage {
 
-    BufferedImage otherBim, otherWarpedBim;
+    BufferedImage otherBim, otherWarpedBim ,otherBaseBim;
     float stage;
+    int otherIntensity;
 
     public MorphableImagePair(BufferedImage b1, BufferedImage b2, float stage)
     {
         super(b1);
-        this.otherBim = b2;
+        this.otherBaseBim = b2;
+        this.otherBim = new BufferedImage(b2.getWidth(), b2.getHeight(), BufferedImage.TYPE_INT_RGB);
+        otherIntensity = 1000;
+        applyOtherIntensity(otherIntensity);
         otherWarpedBim = new BufferedImage(b2.getWidth(), b2.getHeight(), BufferedImage.TYPE_INT_RGB);
         showWarped = false;
         this.stage = stage;
@@ -32,16 +38,16 @@ public class MorphableImagePair extends MorphableImage {
     {
         Triangle tris1 = new Triangle(vs1, vs2, vs5);
         Triangle tris2 = new Triangle(vs1, vs4, vs5);
-        Triangle tris3 = new Triangle(vs2, vs6, vs5);
-        Triangle tris4 = new Triangle(vs2, vs3, vs6);
+        Triangle tris3 = new Triangle(vs2, vs3, vs6);
+        Triangle tris4 = new Triangle(vs2, vs5, vs6);
         Triangle tris5 = new Triangle(vs4, vs8, vs5);
         Triangle tris6 = new Triangle(vs4, vs7, vs8);
         Triangle tris7 = new Triangle(vs5, vs6, vs9);
         Triangle tris8 = new Triangle(vs5, vs8, vs9);
         Triangle trid1 = new Triangle(vd1, vd2, vd5);
         Triangle trid2 = new Triangle(vd1, vd4, vd5);
-        Triangle trid3 = new Triangle(vd2, vd6, vd5);
-        Triangle trid4 = new Triangle(vd2, vd3, vd6);
+        Triangle trid3 = new Triangle(vd2, vd3, vd6);
+        Triangle trid4 = new Triangle(vd2, vd5, vd6);
         Triangle trid5 = new Triangle(vd4, vd8, vd5);
         Triangle trid6 = new Triangle(vd4, vd7, vd8);
         Triangle trid7 = new Triangle(vd5, vd6, vd9);
@@ -79,5 +85,25 @@ public class MorphableImagePair extends MorphableImage {
             big.setComposite(AlphaComposite.SrcOver.derive(stage));
             big.drawImage(otherBim, 0, 0, this);
         }
+    }
+
+    /*
+    This function applies a new intensity to the morphed image.
+    The only argument is an integer. This integer will be divided by 1000 to get the appropriate new intensity.
+     */
+    public void applyOtherIntensity(int intensity)
+    {
+        float[] intensityMatrix = new float[9];
+        intensityMatrix[4] = (float)intensity / 1000.f;
+        Kernel kernel = new Kernel(3, 3, intensityMatrix);
+        ConvolveOp cop = new ConvolveOp(kernel, ConvolveOp.EDGE_NO_OP, null);
+
+        BufferedImage newotherbim = new BufferedImage(otherBaseBim.getWidth(), otherBaseBim.getHeight(), BufferedImage.TYPE_INT_RGB);
+        Graphics2D big = newotherbim.createGraphics();
+        big.drawImage(otherBaseBim, 0, 0, null);
+
+        cop.filter(newotherbim, otherBim);
+
+        this.otherIntensity = intensity;
     }
 }

@@ -27,6 +27,8 @@ public class FullGridPanel extends JPanel
     {}
 
     // Constructor 1: Only image directory is specified
+    // The old definition is now unused since images are automatically scaled to 750x500.
+    /*
     public FullGridPanel(int gridWidth, int gridHeight, boolean editMode, String imageDir)
     {
         this.gridWidth = gridWidth;
@@ -80,6 +82,10 @@ public class FullGridPanel extends JPanel
             }
         }
 
+    }*/
+    public FullGridPanel(int gridWidth, int gridHeight, boolean editMode, String imageDir)
+    {
+        this(gridWidth, gridHeight, editMode, imageDir, 750, 500);
     }
 
     // Constructor 2: Image directory and image sizes are specified
@@ -93,9 +99,9 @@ public class FullGridPanel extends JPanel
         this.mousePoint = new Point();
 
         // If image is too big, scale it down
-        if (this.width > 750 || this.height > 500) {
-            int newWidth = this.width > 750 ? 750 : this.width;
-            int newHeight = this.height > 500 ? 500 : this.height;
+        if (this.width >= 750 || this.height >= 500) {
+            int newWidth = this.width >= 750 ? 750 : this.width;
+            int newHeight = this.height >= 500 ? 500 : this.height;
             image = new MorphableImage(imageDir, newWidth, newHeight);
             this.width = image.getBimWidth();
             this.height = image.getBimHeight();

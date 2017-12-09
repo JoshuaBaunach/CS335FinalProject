@@ -172,6 +172,8 @@ public class GridPoint extends JPanel
                         boundPoly.addPoint(0,0);
                     if (eastNeighbor != null)
                         boundPoly.addPoint(eastNeighbor.getLocation().x - pointWidth, 0);
+                    else
+                        boundPoly.addPoint(parentPanel.getWidth(), 0);
                 }
                 if (eastNeighbor != null)
                     boundPoly.addPoint(eastNeighbor.getLocation().x, eastNeighbor.getLocation().y);

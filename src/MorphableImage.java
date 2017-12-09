@@ -3,6 +3,8 @@ This class defines an image that can have triangle morphs applied to it.
  */
 
 import Jama.Matrix;
+
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.geom.AffineTransform;
@@ -10,6 +12,8 @@ import java.awt.geom.GeneralPath;
 import java.awt.image.BufferedImage;
 import java.awt.image.ConvolveOp;
 import java.awt.image.Kernel;
+import java.io.File;
+import java.io.IOException;
 
 public class MorphableImage extends JLabel {
 
@@ -52,7 +56,7 @@ public class MorphableImage extends JLabel {
         repaint();
     }
 
-    // Constructor 2: Morphable image that uses a Buffered Image that was already created
+    // Constructor 3: Morphable image that uses a Buffered Image that was already created
     public MorphableImage(BufferedImage bim)
     {
         //this.bim = bim;
@@ -100,22 +104,23 @@ public class MorphableImage extends JLabel {
      */
     public BufferedImage readImage (String file, int width, int height) {
 
-        Image image = Toolkit.getDefaultToolkit().getImage(file);
-        MediaTracker tracker = new MediaTracker (new Component () {});
-        tracker.addImage(image, 0);
-        try { tracker.waitForID (0); }
-        catch (InterruptedException e) {}
-        BufferedImage bim = new BufferedImage
-                (image.getWidth(this), image.getHeight(this),
-                        BufferedImage.TYPE_INT_RGB);
-
-        // Scale the image to match the specified width and height
         BufferedImage afterBim = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
-        AffineTransform at = new AffineTransform();
-        at.scale((double)width / (double)bim.getWidth(), (double)height / (double)bim.getHeight());
-        Graphics2D big = afterBim.createGraphics();
-        big.setTransform(at);
-        big.drawImage (image, 0, 0, this);
+        try {
+            BufferedImage bim = ImageIO.read(new File(file));
+
+            // Scale the image to match the specified width and height
+            afterBim = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+            AffineTransform at = new AffineTransform();
+            at.scale((double) width / (double) bim.getWidth(), (double) height / (double) bim.getHeight());
+            Graphics2D big = afterBim.createGraphics();
+            big.setTransform(at);
+            big.drawImage(bim, 0, 0, this);
+            return afterBim;
+        }
+        catch (IOException e)
+        {
+
+        }
         return afterBim;
     }
 
@@ -203,16 +208,16 @@ public class MorphableImage extends JLabel {
     {
         Triangle tris1 = new Triangle(vs1, vs2, vs5);
         Triangle tris2 = new Triangle(vs1, vs4, vs5);
-        Triangle tris3 = new Triangle(vs2, vs6, vs5);
-        Triangle tris4 = new Triangle(vs2, vs3, vs6);
+        Triangle tris3 = new Triangle(vs2, vs3, vs6);
+        Triangle tris4 = new Triangle(vs2, vs5, vs6);
         Triangle tris5 = new Triangle(vs4, vs8, vs5);
         Triangle tris6 = new Triangle(vs4, vs7, vs8);
         Triangle tris7 = new Triangle(vs5, vs6, vs9);
         Triangle tris8 = new Triangle(vs5, vs8, vs9);
         Triangle trid1 = new Triangle(vd1, vd2, vd5);
         Triangle trid2 = new Triangle(vd1, vd4, vd5);
-        Triangle trid3 = new Triangle(vd2, vd6, vd5);
-        Triangle trid4 = new Triangle(vd2, vd3, vd6);
+        Triangle trid3 = new Triangle(vd2, vd3, vd6);
+        Triangle trid4 = new Triangle(vd2, vd5, vd6);
         Triangle trid5 = new Triangle(vd4, vd8, vd5);
         Triangle trid6 = new Triangle(vd4, vd7, vd8);
         Triangle trid7 = new Triangle(vd5, vd6, vd9);
