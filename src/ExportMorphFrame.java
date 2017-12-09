@@ -7,7 +7,6 @@ as they are morphed.
 import com.xuggle.mediatool.IMediaWriter;
 import com.xuggle.mediatool.ToolFactory;
 import com.xuggle.xuggler.IRational;
-import javafx.concurrent.Task;
 
 import java.awt.event.*;
 import java.awt.*;
